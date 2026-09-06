@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+set -eu
+lua_bin="${LUA:-lua}"
+"$lua_bin" "$(dirname "$0")/theme.lua"
+"$lua_bin" "$(dirname "$0")/bridge.lua"
+node "$(dirname "$0")/theme-js.cjs"
+node "$(dirname "$0")/vite-plugin.mjs"
+"$(dirname "$0")/consumers.sh"
