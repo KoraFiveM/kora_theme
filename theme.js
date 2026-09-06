@@ -75,6 +75,24 @@
     applyTokens(tokensFrom(colours));
   }
 
+  async function loadPlayerTheme() {
+    if (typeof GetParentResourceName !== "function") return;
+    try {
+      const response = await fetch(`https://${GetParentResourceName()}/qbtheme:ready`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=UTF-8" },
+        body: "{}",
+      });
+      const payload = response.ok && await response.json();
+      if (payload && Object.prototype.hasOwnProperty.call(payload, "overrides")) {
+        overrides = payload.overrides || null;
+        applyConfigured();
+      }
+    } catch (_) {
+      // Loading screens and other bridge-free pages only use the server theme.
+    }
+  }
+
   async function loadTheme(remaining = retryCount) {
     try {
       const response = await fetch(providerUrl);
@@ -101,5 +119,5 @@
   });
 
   window.QBTheme = Object.freeze({ applyTokens, refresh: () => loadTheme() });
-  void loadTheme();
+  void loadTheme().then(() => loadPlayerTheme());
 })();

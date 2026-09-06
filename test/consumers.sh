@@ -3,7 +3,10 @@ set -eu
 
 workspace=$(CDPATH= cd -- "$(dirname "$0")/../../../.." && pwd)
 resources="$workspace/resources/[test]"
-consumers="qbbanking qbbossmenu qbchat qbclothing qbdispatch qbgarages qbhud qbinventory qblib qbloading qbmultichar qbmultijob qbphone"
+page_consumers="qbbanking qbbossmenu qbchat qbclothing qbhud qbinventory qblib qbloading qbmultichar qbmultijob qbphone"
+bridge_consumers="qbbanking qbbossmenu qbchat qbclothing qbhud qbinventory qblib qbmultichar qbmultijob qbphone"
+headless_apps="qbdispatch qbgarages"
+consumers="$page_consumers $headless_apps"
 
 fail() {
   echo "qbtheme consumer check: $*" >&2
@@ -18,11 +21,23 @@ rg -U -q ':where\(html, body\) \{[^}]*background:[[:space:]]*transparent[[:space
   || fail "qbtheme must not colour FiveM's transparent browser canvas"
 
 for resource in $consumers; do
-  root="$resources/$resource"
-  manifest="$root/fxmanifest.lua"
-  rg -q "dependency ['\"]qbtheme['\"]" "$manifest" || fail "$resource has no direct qbtheme dependency"
-  rg -q "@qbtheme/client/bridge\.lua" "$manifest" || fail "$resource does not import the qbtheme bridge"
+    root="$resources/$resource"
+    manifest="$root/fxmanifest.lua"
+    rg -q "dependency ['\"]qbtheme['\"]" "$manifest" || fail "$resource has no direct qbtheme dependency"
+done
 
+for resource in $bridge_consumers; do
+  manifest="$resources/$resource/fxmanifest.lua"
+  rg -q "@qbtheme/client/bridge\.lua" "$manifest" || fail "$resource does not import the qbtheme bridge"
+done
+
+for resource in qbloading $headless_apps; do
+  manifest="$resources/$resource/fxmanifest.lua"
+  ! rg -q "@qbtheme/client/bridge\.lua" "$manifest" || fail "$resource must not import the qbtheme bridge without a persistent private UI frame"
+done
+
+for resource in $page_consumers; do
+  root="$resources/$resource"
   if [ "$resource" = "qbloading" ]; then
     source_html="$root/html/index.html"
     built_html="$source_html"
@@ -45,7 +60,7 @@ rg -U -q '\.screen \{[^}]*background:[[:space:]]*transparent' "$resources/qbload
   || fail "qbloading must not paint an opaque fullscreen screen"
 
 reserved='--(background|foreground|card|card-foreground|popover|popover-foreground|primary|primary-foreground|secondary|secondary-foreground|muted|muted-foreground|accent|accent-foreground|destructive|danger|border|border-strong|input|ring|brand-hover|brand-pressed|brand-soft|brand-border|surface|surface-raised|surface-panel|surface-hover|control-border|control-border-hover|success|warning|info|armour|radius|shadow-low|shadow-floating|shadow-modal)[[:space:]]*:'
-for resource in $consumers; do
+for resource in $page_consumers; do
   [ "$resource" = "qbloading" ] && source_root="$resources/$resource/html" || source_root="$resources/$resource/web/src"
   if rg -n --glob '*.css' -- "$reserved" "$source_root"; then
     fail "$resource redefines reserved global tokens"

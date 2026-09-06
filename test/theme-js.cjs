@@ -4,6 +4,7 @@ const path = require("node:path")
 const values = new Map()
 const listeners = {}
 let fetches = 0
+let readyPings = 0
 
 global.document = {
   documentElement: {
@@ -14,7 +15,12 @@ global.window = {
   addEventListener: (name, callback) => { listeners[name] = callback },
   setTimeout: () => { throw new Error("theme.json should load without retry") },
 }
+global.GetParentResourceName = () => "consumer"
 global.fetch = async (url) => {
+  if (url === "https://consumer/qbtheme:ready") {
+    readyPings += 1
+    return { ok: true, json: async () => ({ overrides: "#22C55E" }) }
+  }
   fetches += 1
   assert.equal(url, "https://cfx-nui-qbtheme/theme.json")
   return { ok: true, json: async () => ({ colors: {
@@ -30,11 +36,12 @@ require(path.join(__dirname, "..", "theme.js"))
 
 setImmediate(async () => {
   assert.equal(fetches, 1)
-  assert.equal(values.get("--primary"), "348 83.3% 47.1%")
+  assert.equal(readyPings, 1)
+  assert.equal(values.get("--primary"), "142.1 70.6% 45.3%")
   assert.equal(values.get("--background"), "0 0% 6.3%")
 
   listeners.message({ origin: "https://untrusted.example", data: { action: "qbtheme:override", data: "#7C3AED" } })
-  assert.equal(values.get("--primary"), "348 83.3% 47.1%")
+  assert.equal(values.get("--primary"), "142.1 70.6% 45.3%")
 
   listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: "#7C3AED" } })
   assert.equal(values.get("--primary"), "262.1 83.3% 57.8%")
@@ -47,5 +54,5 @@ setImmediate(async () => {
   await window.QBTheme.refresh()
   assert.equal(fetches, 2)
   assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
-  console.log("qbtheme browser loader: 10 assertions passed")
+  console.log("qbtheme browser loader: 11 assertions passed")
 })

@@ -37,4 +37,26 @@ if type(LoadResourceFile) == 'function' then
     end
 end
 
-QBThemeConfig = { colors = colours }
+QBThemeConfig = {
+    colors = colours,
+
+    -- Players can choose a personal primary colour with /theme. The choice is
+    -- saved in client KVP storage and never leaves their machine. Set enabled
+    -- to false to keep the server-wide colour from theme.json for everyone.
+    playerTheme = {
+        enabled = true,
+        command = 'theme',
+        kvpKey = 'qbtheme:playerTheme',
+        presets = {
+            { label = 'Crimson', colour = '#DC143C' },
+            { label = 'Orange', colour = '#F97316' },
+            { label = 'Amber', colour = '#F59E0B' },
+            { label = 'Lime', colour = '#95FF00' },
+            { label = 'Emerald', colour = '#22C55E' },
+            { label = 'Cyan', colour = '#06B6D4' },
+            { label = 'Blue', colour = '#3B82F6' },
+            { label = 'Violet', colour = '#7C3AED' },
+            { label = 'Pink', colour = '#EC4899' },
+        },
+    },
+}

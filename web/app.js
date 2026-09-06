@@ -1,0 +1,88 @@
+(() => {
+  "use strict";
+
+  const picker = document.getElementById("picker");
+  const presets = document.getElementById("presets");
+  const custom = document.getElementById("custom-colour");
+  const customValue = document.getElementById("custom-value");
+  const error = document.getElementById("error");
+  let selected = null;
+
+  const resource = typeof GetParentResourceName === "function" ? GetParentResourceName() : "qbtheme";
+  const post = async (name, data = {}) => {
+    const response = await fetch(`https://${resource}/${name}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  };
+
+  const markSelected = () => {
+    for (const button of presets.children) {
+      button.classList.toggle("selected", button.dataset.colour === selected);
+    }
+  };
+
+  const render = (state) => {
+    if (!state || typeof state !== "object") return;
+    selected = state.selected || null;
+    presets.replaceChildren();
+    for (const preset of state.presets || []) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "swatch";
+      button.title = preset.label;
+      button.dataset.colour = preset.colour;
+      button.style.setProperty("--swatch", preset.colour);
+      button.setAttribute("aria-label", preset.label);
+      button.addEventListener("click", () => void choose(preset.colour));
+      presets.append(button);
+    }
+    const preview = selected || state.default;
+    if (preview) {
+      custom.value = preview;
+      customValue.value = preview;
+    }
+    markSelected();
+  };
+
+  const choose = async (colour) => {
+    error.textContent = "";
+    try {
+      const result = await post("qbtheme:set", { colour });
+      if (!result.ok) throw new Error(result.message || "Could not save that colour.");
+      render(result.state);
+    } catch (reason) {
+      error.textContent = reason instanceof Error ? reason.message : "Could not save that colour.";
+    }
+  };
+
+  const close = async () => {
+    picker.classList.remove("open");
+    picker.setAttribute("aria-hidden", "true");
+    try { await post("qbtheme:close"); } catch (_) { /* resource may be stopping */ }
+  };
+
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "nui://game") return;
+    if (event.data?.action === "qbtheme:open") {
+      render(event.data.data);
+      picker.classList.add("open");
+      picker.setAttribute("aria-hidden", "false");
+      document.getElementById("close").focus();
+    } else if (event.data?.action === "qbtheme:close") {
+      picker.classList.remove("open");
+      picker.setAttribute("aria-hidden", "true");
+    } else if (event.data?.action === "qbtheme:state") {
+      render(event.data.data);
+    }
+  });
+
+  custom.addEventListener("input", () => { customValue.value = custom.value.toUpperCase(); });
+  document.getElementById("apply").addEventListener("click", () => void choose(custom.value));
+  document.getElementById("reset").addEventListener("click", () => void choose(null));
+  document.getElementById("close").addEventListener("click", () => void close());
+  document.getElementById("done").addEventListener("click", () => void close());
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") void close(); });
+})();
