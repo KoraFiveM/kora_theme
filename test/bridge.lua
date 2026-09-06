@@ -24,15 +24,15 @@ end
 
 QBTheme.apply('#7C3AED')
 equal(lastOverrides, '#7C3AED', 'apply forwards override')
-equal(sent[#sent].action, 'qbtheme:tokens', 'apply message action')
-equal(sent[#sent].data.primary, '262.1 83.3% 57.8%', 'apply message tokens')
+equal(sent[#sent].action, 'qbtheme:override', 'apply message action')
+equal(sent[#sent].data, '#7C3AED', 'apply message carries the raw override')
 
 QBTheme.refresh()
 equal(lastOverrides, '#7C3AED', 'refresh retains cached override')
 
 local response
 callbacks['qbtheme:ready']({}, function(value) response = value end)
-equal(response.primary, '262.1 83.3% 57.8%', 'ready returns cached override tokens')
+equal(next(response), nil, 'ready leaves the JSON palette authoritative')
 
 local before = #sent
 handlers.onClientResourceStart('unrelated')
@@ -40,6 +40,7 @@ equal(#sent, before, 'unrelated restart ignored')
 handlers.onClientResourceStart('qbtheme')
 equal(#sent, before + 1, 'qbtheme restart reapplies tokens')
 equal(lastOverrides, '#7C3AED', 'restart retains cached override')
+equal(sent[#sent].action, 'qbtheme:refresh', 'restart reloads theme.json')
 
 QBTheme.apply({ warning = '#F59E0B' })
 equal(type(lastOverrides), 'table', 'semantic table override cached')

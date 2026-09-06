@@ -12,7 +12,7 @@ const development = qbtheme()
 development.configResolved({ command: "serve" })
 assert.equal(
   development.transformIndexHtml.handler('__QBTHEME_BASE__/theme.js'),
-  '/@qbtheme/theme.js?v=2',
+  '/@qbtheme/theme.js?v=3',
 )
 
 let middleware

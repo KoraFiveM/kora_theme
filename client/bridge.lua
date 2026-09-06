@@ -17,13 +17,17 @@ end
 function QBTheme.apply(overrides)
     currentOverrides = overrides or nil
     local result = tokens()
-    SendNUIMessage({ action = 'qbtheme:tokens', data = result })
+    -- The browser reads the base palette directly from qbtheme/theme.json.
+    -- Sending the Lua-derived complete token map here would overwrite that
+    -- palette on clients, where LoadResourceFile is unavailable. Only an
+    -- approved resource-specific override crosses this bridge.
+    SendNUIMessage({ action = 'qbtheme:override', data = currentOverrides })
     return result
 end
 
 function QBTheme.refresh()
     local result = tokens()
-    SendNUIMessage({ action = 'qbtheme:tokens', data = result })
+    SendNUIMessage({ action = 'qbtheme:refresh' })
     return result
 end
 
@@ -32,7 +36,10 @@ function QBTheme.tokens()
 end
 
 RegisterNUICallback('qbtheme:ready', function(_, cb)
-    cb(tokens())
+    -- theme.js loads the provider's static theme.json itself. Keep this
+    -- callback for consumers built against the old bridge without giving a
+    -- client-side Lua fallback precedence over the JSON palette.
+    cb({})
 end)
 
 AddEventHandler('onClientResourceStart', function(resource)

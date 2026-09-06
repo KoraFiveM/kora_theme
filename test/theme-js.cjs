@@ -4,8 +4,6 @@ const path = require("node:path")
 const values = new Map()
 const listeners = {}
 let fetches = 0
-let tokensAvailable = false
-const timers = []
 
 global.document = {
   documentElement: {
@@ -13,51 +11,41 @@ global.document = {
   },
 }
 global.window = {
-  GetParentResourceName: () => "consumer",
   addEventListener: (name, callback) => { listeners[name] = callback },
-  setTimeout: (callback, delay) => {
-    assert.equal(delay, 250)
-    timers.push(callback)
-    return timers.length
-  },
+  setTimeout: () => { throw new Error("theme.json should load without retry") },
 }
-global.fetch = async (url, options) => {
+global.fetch = async (url) => {
   fetches += 1
-  assert.equal(url, "https://consumer/qbtheme:ready")
-  assert.equal(options.method, "POST")
-  return { ok: tokensAvailable, json: async () => ({ primary: "348 83.3% 47.1%", background: "0 0% 6.3%" }) }
+  assert.equal(url, "https://cfx-nui-qbtheme/theme.json")
+  return { ok: true, json: async () => ({ colors: {
+    background: "#101010", surface: "#171717", surfacePopover: "#1B1B1B",
+    surfaceRaised: "#242424", surfaceHover: "#2A2A2A", foreground: "#F5F5F5",
+    mutedForeground: "#949494", border: "#343434", borderStrong: "#444444",
+    control: "#666666", controlHover: "#7A7A7A", primary: "#DC143C",
+    success: "#22C55E", warning: "#F59E0B", danger: "#EF4444", info: "#D4D4D4", armour: "#3B9EFF",
+  } }) }
 }
 
 require(path.join(__dirname, "..", "theme.js"))
 
 setImmediate(async () => {
   assert.equal(fetches, 1)
-  assert.equal(timers.length, 1)
-  tokensAvailable = true
-  timers.shift()()
-  await new Promise(setImmediate)
-  assert.equal(fetches, 2)
+  assert.equal(values.get("--primary"), "348 83.3% 47.1%")
+  assert.equal(values.get("--background"), "0 0% 6.3%")
+
+  listeners.message({ origin: "https://untrusted.example", data: { action: "qbtheme:override", data: "#7C3AED" } })
   assert.equal(values.get("--primary"), "348 83.3% 47.1%")
 
-  listeners.message({ origin: "https://untrusted.example", data: { action: "qbtheme:tokens", data: { primary: "bad" } } })
-  assert.equal(values.get("--primary"), "348 83.3% 47.1%")
-
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:tokens", data: {
-    primary: "262.1 83.3% 57.8%",
-    "Bad!": "ignored",
-    warning: 123,
-    info: "x".repeat(161),
-  } } })
+  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: "#7C3AED" } })
   assert.equal(values.get("--primary"), "262.1 83.3% 57.8%")
-  assert.equal(values.has("--Bad!"), false)
-  assert.equal(values.has("--warning"), false)
-  assert.equal(values.has("--info"), false)
+  assert.equal(values.get("--background"), "0 0% 6.3%")
+
+  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: { primary: "bad", warning: "#FDE047" } } })
+  assert.equal(values.get("--primary"), "348 83.3% 47.1%")
+  assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
 
   await window.QBTheme.refresh()
-  assert.equal(fetches, 3)
-
-  delete window.GetParentResourceName
-  await window.QBTheme.refresh()
-  assert.equal(fetches, 3)
-  console.log("qbtheme browser loader: 12 assertions passed")
+  assert.equal(fetches, 2)
+  assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
+  console.log("qbtheme browser loader: 10 assertions passed")
 })

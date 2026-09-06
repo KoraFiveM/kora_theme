@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const resourceRoot = dirname(fileURLToPath(import.meta.url));
 const developmentBase = "/@qbtheme";
 const productionBase = "https://cfx-nui-qbtheme";
-const runtimeVersion = "2";
+const runtimeVersion = "3";
 
 export default function qbtheme() {
   let command = "build";
