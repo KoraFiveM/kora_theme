@@ -8,6 +8,18 @@
   const error = document.getElementById("error");
   let selected = null;
 
+  // Match every other first-party NUI: author at 1920x1080 and scale the
+  // complete surface in both directions for the player's native resolution.
+  const scaleNui = () => {
+    const scale = Math.min(2, Math.max(0.5, Math.min(window.innerWidth / 1920, window.innerHeight / 1080)));
+    document.body.style.width = `${window.innerWidth / scale}px`;
+    document.body.style.height = `${window.innerHeight / scale}px`;
+    document.body.style.transform = `scale(${scale})`;
+    document.body.style.transformOrigin = "top left";
+  };
+  scaleNui();
+  window.addEventListener("resize", scaleNui);
+
   const resource = typeof GetParentResourceName === "function" ? GetParentResourceName() : "qbtheme";
   const post = async (name, data = {}) => {
     const response = await fetch(`https://${resource}/${name}`, {
