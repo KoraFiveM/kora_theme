@@ -3,9 +3,9 @@ set -eu
 
 workspace=$(CDPATH= cd -- "$(dirname "$0")/../../../.." && pwd)
 resources="$workspace/resources/[test]"
-page_consumers="qbbossmenu qbchat qbclothing qbhud qbinventory qblib qbloading qbmultichar qbmultijob qbphone"
-bridge_consumers="qbbossmenu qbchat qbclothing qbhud qbinventory qblib qbmultichar qbmultijob qbphone"
-headless_apps="qbbanking qbdispatch qbgarages"
+page_consumers="qbcards qbchat qbclothing qbhud qbinventory qblib qbloading qbmultichar qbphone"
+bridge_consumers="qbcards qbchat qbclothing qbhud qbinventory qblib qbmultichar qbphone"
+headless_apps="qbbanking qbdispatch qbgarages qbmultijob"
 consumers="$page_consumers $headless_apps"
 
 fail() {
