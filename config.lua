@@ -60,3 +60,42 @@ QBThemeConfig = {
         },
     },
 }
+
+-- qblib depends on qbtheme, so this resource cannot declare qblib as a normal
+-- manifest dependency. Once qblib finishes starting, load the same
+-- consumer-local bridge used by every other resource and register the theme
+-- table without creating a startup cycle.
+local function registerConfiguration()
+    local source = LoadResourceFile and LoadResourceFile('qblib', 'modules/config/consumer.lua')
+    if type(source) ~= 'string' or source == '' then return false end
+
+    local factory, loadError = load(source, '@@qblib/modules/config/consumer.lua', 't', _ENV)
+    if not factory then
+        print(('[qbtheme] Could not load the qblib configuration bridge: %s'):format(loadError))
+        return false
+    end
+
+    local bridge = factory()({
+        config_register = function(_, definition)
+            return exports.qblib:config_register(definition)
+        end,
+    })
+    QBThemeConfig = bridge.adopt(QBThemeConfig)
+    return true
+end
+
+local function deferRegistration()
+    if type(SetTimeout) == 'function' then
+        SetTimeout(0, registerConfiguration)
+    else
+        registerConfiguration()
+    end
+end
+
+if type(GetResourceState) == 'function' and GetResourceState('qblib') == 'started' then
+    deferRegistration()
+elseif type(AddEventHandler) == 'function' then
+    AddEventHandler('onResourceStart', function(resource)
+        if resource == 'qblib' then deferRegistration() end
+    end)
+end
