@@ -16,11 +16,9 @@ fail() {
 first_ensure=$(awk '/^[[:space:]]*ensure[[:space:]]+/ { print $2; exit }' "$workspace/server.cfg")
 [ "$first_ensure" = "qbtheme" ] || fail "qbtheme must be the first ensured resource"
 ox_lib_ensure_count=$(awk '$1 == "ensure" && $2 == "ox_lib" { count++ } END { print count + 0 }' "$workspace/server.cfg")
-[ "$ox_lib_ensure_count" -eq 1 ] || fail "server.cfg must ensure ox_lib exactly once"
+[ "$ox_lib_ensure_count" -eq 0 ] || fail "server.cfg must not ensure optional ox_lib"
 ox_lib_resource_count=$(find "$workspace/resources" -mindepth 2 -maxdepth 2 -type d -name ox_lib | wc -l)
 [ "$ox_lib_resource_count" -eq 1 ] || fail "resources must contain exactly one ox_lib compatibility resource"
-after_qblib=$(awk '$1 == "ensure" { if (found) { print $2; exit } if ($2 == "qblib") found = 1 }' "$workspace/server.cfg")
-[ "$after_qblib" = "ox_lib" ] || fail "ox_lib must be the first ensured resource after qblib"
 rg -U -q ':where\(html, body\) \{[^}]*background:[[:space:]]*transparent[[:space:]]*!important' "$resources/qbtheme/theme.css" \
   || fail "qbtheme must keep document bodies transparent"
 ! rg -q 'color-scheme:[[:space:]]*dark' "$resources/qbtheme/theme.css" \
