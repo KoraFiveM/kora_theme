@@ -1,6 +1,6 @@
 -- This file is imported into each UI-owning resource. It deliberately runs in
 -- the consumer's Lua VM so raw NUI natives target that consumer's frame.
-local PROVIDER = 'qbtheme'
+local PROVIDER = 'kora_theme'
 local currentOverrides
 local playerOverride
 
@@ -35,7 +35,7 @@ end
 function QBTheme.apply(overrides)
     currentOverrides = overrides or nil
     local result = tokens()
-    -- The browser reads the base palette directly from qbtheme/theme.json.
+    -- The browser reads the base palette directly from kora_theme/theme.json.
     -- Sending the Lua-derived complete token map here would overwrite that
     -- palette on clients, where LoadResourceFile is unavailable. Only an
     -- approved resource-specific override crosses this bridge.

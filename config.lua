@@ -25,7 +25,7 @@ local colours = {}
 for key, value in pairs(fallback) do colours[key] = value end
 
 if type(LoadResourceFile) == 'function' then
-    local resource = type(GetCurrentResourceName) == 'function' and GetCurrentResourceName() or 'qbtheme'
+    local resource = type(GetCurrentResourceName) == 'function' and GetCurrentResourceName() or 'kora_theme'
     local ok, raw = pcall(LoadResourceFile, resource, 'theme.json')
     if ok and type(raw) == 'string' then
         -- theme.json is deliberately a flat colour map. Parsing the known
@@ -61,15 +61,15 @@ QBThemeConfig = {
     },
 }
 
--- qblib depends on qbtheme, so this resource cannot declare qblib as a normal
--- manifest dependency. Once qblib finishes starting, load the same
+-- kora_lib depends on kora_theme, so this resource cannot declare kora_lib as a normal
+-- manifest dependency. Once kora_lib finishes starting, load the same
 -- consumer-local bridge used by every other resource and register the theme
 -- table without creating a startup cycle.
 local function registerConfiguration()
-    local source = LoadResourceFile and LoadResourceFile('qblib', 'modules/config/consumer.lua')
+    local source = LoadResourceFile and LoadResourceFile('kora_lib', 'modules/config/consumer.lua')
     if type(source) ~= 'string' or source == '' then return false end
 
-    local factory, loadError = load(source, '@@qblib/modules/config/consumer.lua', 't', _ENV)
+    local factory, loadError = load(source, '@@kora_lib/modules/config/consumer.lua', 't', _ENV)
     if not factory then
         print(('[qbtheme] Could not load the qblib configuration bridge: %s'):format(loadError))
         return false
@@ -77,7 +77,7 @@ local function registerConfiguration()
 
     local bridge = factory()({
         config_register = function(_, definition)
-            return exports.qblib:config_register(definition)
+            return exports.kora_lib:config_register(definition)
         end,
     })
     QBThemeConfig = bridge.adopt(QBThemeConfig)
@@ -92,10 +92,10 @@ local function deferRegistration()
     end
 end
 
-if type(GetResourceState) == 'function' and GetResourceState('qblib') == 'started' then
+if type(GetResourceState) == 'function' and GetResourceState('kora_lib') == 'started' then
     deferRegistration()
 elseif type(AddEventHandler) == 'function' then
     AddEventHandler('onResourceStart', function(resource)
-        if resource == 'qblib' then deferRegistration() end
+        if resource == 'kora_lib' then deferRegistration() end
     end)
 end

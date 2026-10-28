@@ -1,15 +1,15 @@
-# qbtheme
+# kora_theme
 
 Shared dark design system for qbcore2 browser UIs. Start this resource before
 all UI resources and declare `dependency 'qbtheme'` in each consumer.
 
 Browser pages load `https://cfx-nui-qbtheme/theme.css` and `theme.js`. Resources
-with a persistent private UI frame import `@qbtheme/client/bridge.lua` for live
+with a persistent private UI frame import `@kora_theme/client/bridge.lua` for live
 refresh behavior. A loading screen whose frame is permanently shut down does
 not keep that Lua bridge, and headless AppShell consumers pass their accent to
-qblib instead of sending NUI messages from their own resource.
+kora_lib instead of sending NUI messages from their own resource.
 
-Change the semantic hex colours in `theme.json`, then restart `qbtheme`.
+Change the semantic hex colours in `theme.json`, then restart `kora_theme`.
 Running UI resources receive the new tokens without being restarted. A
 consumer that owns an approved accent can call `QBTheme.apply('#RRGGBB')`;
 `QBTheme.refresh()` reapplies the cached override.
@@ -29,10 +29,10 @@ over the player's general preference.
 
 ## Exports
 
-- `exports.qbtheme:getTokens(overrides?)`
-- `exports.qbtheme:getPrimaryColor()`
-- `exports.qbtheme:getPlayerTheme()` (client)
-- `exports.qbtheme:setPlayerTheme(colour?)` (client)
+- `exports.kora_theme:getTokens(overrides?)`
+- `exports.kora_theme:getPrimaryColor()`
+- `exports.kora_theme:getPlayerTheme()` (client)
+- `exports.kora_theme:setPlayerTheme(colour?)` (client)
 
 `getTokens` accepts a primary-colour string or a table containing any keys
 from `QBThemeConfig.colors`. Invalid values are ignored and logged once. Its

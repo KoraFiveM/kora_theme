@@ -14,14 +14,14 @@ fail() {
 }
 
 first_ensure=$(awk '/^[[:space:]]*ensure[[:space:]]+/ { print $2; exit }' "$workspace/server.cfg")
-[ "$first_ensure" = "qbtheme" ] || fail "qbtheme must be the first ensured resource"
+[ "$first_ensure" = "kora_theme" ] || fail "qbtheme must be the first ensured resource"
 ox_lib_ensure_count=$(awk '$1 == "ensure" && $2 == "ox_lib" { count++ } END { print count + 0 }' "$workspace/server.cfg")
 [ "$ox_lib_ensure_count" -eq 0 ] || fail "server.cfg must not ensure optional ox_lib"
 ox_lib_resource_count=$(find "$workspace/resources" -mindepth 2 -maxdepth 2 -type d -name ox_lib | wc -l)
 [ "$ox_lib_resource_count" -eq 1 ] || fail "resources must contain exactly one ox_lib compatibility resource"
-rg -U -q ':where\(html, body\) \{[^}]*background:[[:space:]]*transparent[[:space:]]*!important' "$resources/qbtheme/theme.css" \
+rg -U -q ':where\(html, body\) \{[^}]*background:[[:space:]]*transparent[[:space:]]*!important' "$resources/kora_theme/theme.css" \
   || fail "qbtheme must keep document bodies transparent"
-! rg -q 'color-scheme:[[:space:]]*dark' "$resources/qbtheme/theme.css" \
+! rg -q 'color-scheme:[[:space:]]*dark' "$resources/kora_theme/theme.css" \
   || fail "qbtheme must not colour FiveM's transparent browser canvas"
 
 for resource in $consumers; do
@@ -32,23 +32,23 @@ done
 
 for resource in $bridge_consumers; do
   manifest="$resources/$resource/fxmanifest.lua"
-  rg -q "@qbtheme/client/bridge\.lua" "$manifest" || fail "$resource does not import the qbtheme bridge"
+  rg -q "@kora_theme/client/bridge\.lua" "$manifest" || fail "$resource does not import the qbtheme bridge"
 done
 
 for resource in qbloading $headless_apps; do
   manifest="$resources/$resource/fxmanifest.lua"
-  ! rg -q "@qbtheme/client/bridge\.lua" "$manifest" || fail "$resource must not import the qbtheme bridge without a persistent private UI frame"
+  ! rg -q "@kora_theme/client/bridge\.lua" "$manifest" || fail "$resource must not import the qbtheme bridge without a persistent private UI frame"
 done
 
 for resource in $page_consumers; do
   root="$resources/$resource"
-  if [ "$resource" = "qbloading" ]; then
+  if [ "$resource" = "kora_loading" ]; then
     source_html="$root/html/index.html"
     built_html="$source_html"
   else
     source_html="$root/web/index.html"
     built_html="$root/web/build/index.html"
-    rg -q "qbtheme from ['\"]\.\./\.\./qbtheme/vite-plugin\.mjs['\"]" "$root/web/vite.config.ts" || fail "$resource does not use qbtheme's Vite helper"
+    rg -q "qbtheme from ['\"]\.\./\.\./kora_theme/vite-plugin\.mjs['\"]" "$root/web/vite.config.ts" || fail "$resource does not use qbtheme's Vite helper"
   fi
 
   rg -q "QBTHEME_BASE.*theme\.css|cfx-nui-qbtheme/theme\.css" "$source_html" || fail "$resource source HTML does not link theme.css"
@@ -58,14 +58,14 @@ for resource in $page_consumers; do
   rg -q "https://cfx-nui-qbtheme/theme\.js" "$built_html" || fail "$resource build copied or omitted theme.js"
 done
 
-rg -U -q 'html,[[:space:]]*\nbody \{[^}]*background:[[:space:]]*transparent[[:space:]]*!important' "$resources/qbloading/html/style.css" \
+rg -U -q 'html,[[:space:]]*\nbody \{[^}]*background:[[:space:]]*transparent[[:space:]]*!important' "$resources/kora_loading/html/style.css" \
   || fail "qbloading must keep its document body transparent"
-rg -U -q '\.screen \{[^}]*background:[[:space:]]*transparent' "$resources/qbloading/html/style.css" \
+rg -U -q '\.screen \{[^}]*background:[[:space:]]*transparent' "$resources/kora_loading/html/style.css" \
   || fail "qbloading must not paint an opaque fullscreen screen"
 
 reserved='--(background|foreground|card|card-foreground|popover|popover-foreground|primary|primary-foreground|secondary|secondary-foreground|muted|muted-foreground|accent|accent-foreground|destructive|danger|border|border-strong|input|ring|brand-hover|brand-pressed|brand-soft|brand-border|surface|surface-raised|surface-panel|surface-hover|control-border|control-border-hover|success|warning|info|armour|radius|shadow-low|shadow-floating|shadow-modal)[[:space:]]*:'
 for resource in $page_consumers; do
-  [ "$resource" = "qbloading" ] && source_root="$resources/$resource/html" || source_root="$resources/$resource/web/src"
+  [ "$resource" = "kora_loading" ] && source_root="$resources/$resource/html" || source_root="$resources/$resource/web/src"
   if rg -n --glob '*.css' -- "$reserved" "$source_root"; then
     fail "$resource redefines reserved global tokens"
   fi

@@ -5,7 +5,7 @@ _G.exports = setmetatable({}, {
     __call = function(_, name, fn) registered[name] = fn end,
 })
 
-_G.GetCurrentResourceName = function() return 'qbtheme' end
+_G.GetCurrentResourceName = function() return 'kora_theme' end
 _G.LoadResourceFile = function(_, path)
     local file = assert(io.open(root .. path, 'r'))
     local content = file:read('*a')

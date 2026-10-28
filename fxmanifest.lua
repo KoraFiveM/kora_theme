@@ -2,7 +2,9 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-name 'qbtheme'
+name 'kora_theme'
+-- Keep the legacy resource name resolvable for exports['qbtheme'] callers.
+provide 'qbtheme'
 author 'qbcore2'
 version '1.0.0'
 description 'Shared design tokens and browser styling for qbcore2 resources'

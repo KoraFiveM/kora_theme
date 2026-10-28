@@ -20,7 +20,7 @@
   scaleNui();
   window.addEventListener("resize", scaleNui);
 
-  const resource = typeof GetParentResourceName === "function" ? GetParentResourceName() : "qbtheme";
+  const resource = typeof GetParentResourceName === "function" ? GetParentResourceName() : "kora_theme";
   const post = async (name, data = {}) => {
     const response = await fetch(`https://${resource}/${name}`, {
       method: "POST",

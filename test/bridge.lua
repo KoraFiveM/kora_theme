@@ -4,7 +4,7 @@ local lastOverrides
 local playerTheme = '#22C55E'
 
 _G.exports = {
-    qbtheme = {
+    kora_theme = {
         getTokens = function(_, overrides)
             lastOverrides = overrides
             return { primary = overrides == '#7C3AED' and '262.1 83.3% 57.8%' or '348 83.3% 47.1%' }
@@ -39,7 +39,7 @@ equal(response.overrides, '#7C3AED', 'ready returns the effective resource overr
 local before = #sent
 handlers.onClientResourceStart('unrelated')
 equal(#sent, before, 'unrelated restart ignored')
-handlers.onClientResourceStart('qbtheme')
+handlers.onClientResourceStart('kora_theme')
 equal(#sent, before + 2, 'qbtheme restart reloads and reapplies tokens')
 equal(lastOverrides, '#7C3AED', 'restart retains cached override')
 equal(sent[#sent - 1].action, 'qbtheme:refresh', 'restart reloads theme.json')

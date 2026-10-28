@@ -128,11 +128,11 @@ if ENABLED then
 
     addChatSuggestion()
 
-    -- qbtheme normally starts before the chat resource, so repeat the
-    -- suggestion when qbchat becomes available instead of relying on startup
-    -- order. qbchat replaces the existing entry when it is already present.
+    -- kora_theme normally starts before the chat resource, so repeat the
+    -- suggestion when kora_chat becomes available instead of relying on startup
+    -- order. kora_chat replaces the existing entry when it is already present.
     AddEventHandler('onClientResourceStart', function(resource)
-        if resource == 'qbchat' then addChatSuggestion() end
+        if resource == 'kora_chat' then addChatSuggestion() end
     end)
 end
 

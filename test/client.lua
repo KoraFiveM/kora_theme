@@ -6,7 +6,7 @@ local registered = {}
 _G.exports = setmetatable({}, {
     __call = function(_, name, fn) registered[name] = fn end,
 })
-_G.GetCurrentResourceName = function() return 'qbtheme' end
+_G.GetCurrentResourceName = function() return 'kora_theme' end
 _G.LoadResourceFile = function(_, path)
     local file = assert(io.open(root .. path, 'r'))
     local content = file:read('*a')
@@ -35,7 +35,7 @@ end
 equal(registered.getPlayerTheme(), '#7C3AED', 'saved theme loads and normalises')
 equal(type(commands.theme), 'function', 'theme command registered by default')
 local suggestionCount = #events
-handlers.onClientResourceStart('qbchat')
+handlers.onClientResourceStart('kora_chat')
 equal(#events, suggestionCount + 1, 'chat restart restores command suggestion')
 equal(events[#events].name, 'chat:addSuggestion', 'chat restart publishes suggestion')
 
