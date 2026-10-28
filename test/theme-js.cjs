@@ -22,7 +22,7 @@ global.fetch = async (url) => {
     return { ok: true, json: async () => ({ overrides: "#22C55E" }) }
   }
   fetches += 1
-  assert.equal(url, "https://cfx-nui-qbtheme/theme.json")
+  assert.equal(url, "https://cfx-nui-kora_theme/theme.json")
   return { ok: true, json: async () => ({ colors: {
     background: "#101010", surface: "#171717", surfacePopover: "#1B1B1B",
     surfaceRaised: "#242424", surfaceHover: "#2A2A2A", foreground: "#F5F5F5",

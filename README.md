@@ -3,7 +3,7 @@
 Shared dark design system for qbcore2 browser UIs. Start this resource before
 all UI resources and declare `dependency 'qbtheme'` in each consumer.
 
-Browser pages load `https://cfx-nui-qbtheme/theme.css` and `theme.js`. Resources
+Browser pages load `https://cfx-nui-kora_theme/theme.css` and `theme.js`. Resources
 with a persistent private UI frame import `@kora_theme/client/bridge.lua` for live
 refresh behavior. A loading screen whose frame is permanently shut down does
 not keep that Lua bridge, and headless AppShell consumers pass their accent to

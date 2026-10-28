@@ -51,11 +51,11 @@ for resource in $page_consumers; do
     rg -q "qbtheme from ['\"]\.\./\.\./kora_theme/vite-plugin\.mjs['\"]" "$root/web/vite.config.ts" || fail "$resource does not use qbtheme's Vite helper"
   fi
 
-  rg -q "QBTHEME_BASE.*theme\.css|cfx-nui-qbtheme/theme\.css" "$source_html" || fail "$resource source HTML does not link theme.css"
-  rg -q "QBTHEME_BASE.*theme\.js|cfx-nui-qbtheme/theme\.js" "$source_html" || fail "$resource source HTML does not load theme.js"
+  rg -q "QBTHEME_BASE.*theme\.css|cfx-nui-kora_theme/theme\.css" "$source_html" || fail "$resource source HTML does not link theme.css"
+  rg -q "QBTHEME_BASE.*theme\.js|cfx-nui-kora_theme/theme\.js" "$source_html" || fail "$resource source HTML does not load theme.js"
   [ -f "$built_html" ] || fail "$resource has no built HTML"
-  rg -q "https://cfx-nui-qbtheme/theme\.css" "$built_html" || fail "$resource build copied or omitted theme.css"
-  rg -q "https://cfx-nui-qbtheme/theme\.js" "$built_html" || fail "$resource build copied or omitted theme.js"
+  rg -q "https://cfx-nui-kora_theme/theme\.css" "$built_html" || fail "$resource build copied or omitted theme.css"
+  rg -q "https://cfx-nui-kora_theme/theme\.js" "$built_html" || fail "$resource build copied or omitted theme.js"
 done
 
 rg -U -q 'html,[[:space:]]*\nbody \{[^}]*background:[[:space:]]*transparent[[:space:]]*!important' "$resources/kora_loading/html/style.css" \

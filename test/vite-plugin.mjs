@@ -5,7 +5,7 @@ const production = qbtheme()
 production.configResolved({ command: "build" })
 assert.equal(
   production.transformIndexHtml.handler('__QBTHEME_BASE__/theme.css'),
-  'https://cfx-nui-qbtheme/theme.css',
+  'https://cfx-nui-kora_theme/theme.css',
 )
 
 const development = qbtheme()
