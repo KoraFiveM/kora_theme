@@ -71,7 +71,7 @@ local function registerConfiguration()
 
     local factory, loadError = load(source, '@@kora_lib/modules/config/consumer.lua', 't', _ENV)
     if not factory then
-        print(('[qbtheme] Could not load the qblib configuration bridge: %s'):format(loadError))
+        print(('[qbtheme] Could not load the kora_lib configuration bridge: %s'):format(loadError))
         return false
     end
 
