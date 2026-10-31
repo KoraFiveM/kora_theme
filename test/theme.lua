@@ -28,6 +28,16 @@ equal(tokens.background, '0 0% 6.3%', 'background HSL')
 assert(tokens['brand-soft'] == tokens.primary .. ' / 0.14', 'soft primary')
 assert(tokens['primary-foreground'] == '0 0% 100%' or tokens['primary-foreground'] == '0 0% 6.3%', 'primary foreground contrast')
 
+equal(configuredPrimary, '#95FF00', 'theme.json primary is kora green')
+equal(tokens.primary, '84.9 100% 50%', 'default primary HSL')
+equal(tokens['primary-foreground'], '0 0% 6.3%', 'dark text on kora green')
+equal(tokens['brand-hover'], '84.9 100% 44.9%', 'brand hover derives from green')
+local presets = QBThemeConfig.playerTheme.presets
+equal(presets[1].label, 'Kora green', 'first preset is Kora green')
+equal(presets[1].colour, '#95FF00', 'first preset colour')
+local crimson = registered.getTokens('#DC143C')
+equal(crimson['primary-foreground'], '0 0% 100%', 'crimson preset keeps white text')
+
 local violet = registered.getTokens('#7C3AED')
 equal(violet.primary, '262.1 83.3% 57.8%', 'string primary override')
 equal(violet.background, tokens.background, 'primary override keeps background')
@@ -53,4 +63,4 @@ local css = assert(io.open(root .. 'theme.css', 'r')):read('*a')
 assert(css:find('--primary:', 1, true), 'theme.css must define a startup fallback primary')
 assert(css:find('::%-webkit%-scrollbar%-thumb'), 'theme.css must define thumb-only scrollbars')
 
-print('qbtheme: 20 assertions passed')
+print('qbtheme: 27 assertions passed')

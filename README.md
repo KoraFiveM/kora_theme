@@ -9,7 +9,8 @@ refresh behavior. A loading screen whose frame is permanently shut down does
 not keep that Lua bridge, and headless AppShell consumers pass their accent to
 kora_lib instead of sending NUI messages from their own resource.
 
-Change the semantic hex colours in `theme.json`, then restart `kora_theme`.
+The default primary is Kora green `#95FF00`; the contrast token puts dark text
+on it. Change the semantic hex colours in `theme.json`, then restart `kora_theme`.
 Running UI resources receive the new tokens without being restarted. A
 consumer that owns an approved accent can call `QBTheme.apply('#RRGGBB')`;
 `QBTheme.refresh()` reapplies the cached override.
