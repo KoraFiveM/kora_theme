@@ -48,10 +48,10 @@ QBThemeConfig = {
         command = 'theme',
         kvpKey = 'qbtheme:playerTheme',
         presets = {
+            { label = 'Kora green', colour = '#95FF00' },
             { label = 'Crimson', colour = '#DC143C' },
             { label = 'Orange', colour = '#F97316' },
             { label = 'Amber', colour = '#F59E0B' },
-            { label = 'Lime', colour = '#95FF00' },
             { label = 'Emerald', colour = '#22C55E' },
             { label = 'Cyan', colour = '#06B6D4' },
             { label = 'Blue', colour = '#3B82F6' },

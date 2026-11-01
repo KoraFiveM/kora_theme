@@ -66,6 +66,8 @@ local ready
 callbacks['qbtheme:ready']({}, function(value) ready = value end)
 equal(ready.overrides, nil, 'ready response reports server default')
 equal(type(ready.picker.presets), 'table', 'ready response includes presets')
+equal(ready.picker.presets[1].label, 'Kora green', 'picker lists Kora green first')
+equal(ready.picker.default, '#95FF00', 'picker default is kora green')
 
 callbacks['qbtheme:close']({}, function() end)
 equal(focus[#focus][1], false, 'close releases keyboard focus')

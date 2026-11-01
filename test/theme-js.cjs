@@ -27,7 +27,7 @@ global.fetch = async (url) => {
     background: "#101010", surface: "#171717", surfacePopover: "#1B1B1B",
     surfaceRaised: "#242424", surfaceHover: "#2A2A2A", foreground: "#F5F5F5",
     mutedForeground: "#949494", border: "#343434", borderStrong: "#444444",
-    control: "#666666", controlHover: "#7A7A7A", primary: "#DC143C",
+    control: "#666666", controlHover: "#7A7A7A", primary: "#95FF00",
     success: "#22C55E", warning: "#F59E0B", danger: "#EF4444", info: "#D4D4D4", armour: "#3B9EFF",
   } }) }
 }
@@ -48,11 +48,12 @@ setImmediate(async () => {
   assert.equal(values.get("--background"), "0 0% 6.3%")
 
   listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: { primary: "bad", warning: "#FDE047" } } })
-  assert.equal(values.get("--primary"), "348 83.3% 47.1%")
+  assert.equal(values.get("--primary"), "84.9 100% 50%")
+  assert.equal(values.get("--primary-foreground"), "0 0% 6.3%")
   assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
 
   await window.QBTheme.refresh()
   assert.equal(fetches, 2)
   assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
-  console.log("qbtheme browser loader: 11 assertions passed")
+  console.log("qbtheme browser loader: 12 assertions passed")
 })
