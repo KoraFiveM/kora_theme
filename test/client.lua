@@ -23,6 +23,8 @@ _G.TriggerEvent = function(name, ...) events[#events + 1] = { name = name, args 
 _G.SendNUIMessage = function(message) messages[#messages + 1] = message end
 _G.SetNuiFocus = function(keyboard, cursor) focus[#focus + 1] = { keyboard, cursor } end
 
+dofile(root .. 'test/json.lua')
+dofile(root .. 'theme_loader.lua')
 dofile(root .. 'config.lua')
 dofile(root .. 'client/main.lua')
 
@@ -67,14 +69,14 @@ callbacks['qbtheme:ready']({}, function(value) ready = value end)
 equal(ready.overrides, nil, 'ready response reports server default')
 equal(type(ready.picker.presets), 'table', 'ready response includes presets')
 equal(ready.picker.presets[1].label, 'Kora green', 'picker lists Kora green first')
-equal(ready.picker.default, '#95FF00', 'picker default is kora green')
+equal(ready.picker.default, '#95FF00', 'picker default is theme.json primary')
+equal(ready.picker.presets[2].label, 'Crimson', 'picker lists theme.json presets after the default')
 
 callbacks['qbtheme:close']({}, function() end)
 equal(focus[#focus][1], false, 'close releases keyboard focus')
 equal(messages[#messages].action, 'qbtheme:close', 'close hides picker')
 
 QBThemeConfig = {
-    colors = { primary = '#123456' },
     playerTheme = { enabled = false, command = 'disabledtheme', kvpKey = 'disabled' },
 }
 commands, callbacks, registered = {}, {}, {}

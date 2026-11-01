@@ -23,6 +23,7 @@ files {
 }
 
 shared_scripts {
+    'theme_loader.lua',
     'config.lua',
     'shared.lua',
 }

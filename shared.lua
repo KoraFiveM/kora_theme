@@ -1,29 +1,11 @@
-local DEFAULTS = {
-    background = '#101010',
-    surface = '#171717',
-    surfacePopover = '#1B1B1B',
-    surfaceRaised = '#242424',
-    surfaceHover = '#2A2A2A',
-    foreground = '#F5F5F5',
-    mutedForeground = '#949494',
-    border = '#343434',
-    borderStrong = '#444444',
-    control = '#666666',
-    controlHover = '#7A7A7A',
-    primary = '#95FF00',
-    success = '#22C55E',
-    warning = '#F59E0B',
-    danger = '#EF4444',
-    info = '#D4D4D4',
-    armour = '#3B9EFF',
-}
+local COLOURS = type(KoraThemeFile) == 'table' and KoraThemeFile.colours or {}
 
 local warned = {}
 
 local function warnOnce(key, message)
     if warned[key] then return end
     warned[key] = true
-    print(('[qbtheme] %s'):format(message))
+    print(('[kora_theme] %s'):format(message))
 end
 
 local function validHex(value)
@@ -31,14 +13,7 @@ local function validHex(value)
 end
 
 local function configuredColour(key)
-    local colours = type(QBThemeConfig) == 'table' and QBThemeConfig.colors or nil
-    local value = type(colours) == 'table' and colours[key] or nil
-    if validHex(value) then return value:upper() end
-
-    if value ~= nil then
-        warnOnce(('config:%s'):format(key), ('Config colour %q must be #RRGGBB; using %s.'):format(key, DEFAULTS[key]))
-    end
-    return DEFAULTS[key]
+    return COLOURS[key]
 end
 
 local function round1(value)
@@ -86,7 +61,8 @@ local function hslToken(hex, alpha, lightnessOffset)
 end
 
 local function relativeLuminance(hex)
-    local red, green, blue = rgbFromHex(hex)
+    local red, green, blue
+    if type(hex) == 'number' then red, green, blue = hex, hex, hex else red, green, blue = rgbFromHex(hex) end
     local function channel(value)
         value = value / 255
         return value <= 0.03928 and value / 12.92 or ((value + 0.055) / 1.055) ^ 2.4
@@ -94,11 +70,12 @@ local function relativeLuminance(hex)
     return 0.2126 * channel(red) + 0.7152 * channel(green) + 0.0722 * channel(blue)
 end
 
-local DARK = '#101010'
+-- Fixed dark text grey (16/255) used for primary-foreground contrast.
+local DARK_CHANNEL = 16
 local function contrastToken(hex)
     local luminance = relativeLuminance(hex)
     local whiteContrast = 1.05 / (luminance + 0.05)
-    local darkLuminance = relativeLuminance(DARK)
+    local darkLuminance = relativeLuminance(DARK_CHANNEL)
     local darkContrast = (luminance + 0.05) / (darkLuminance + 0.05)
     return whiteContrast >= darkContrast and '0 0% 100%' or '0 0% 6.3%'
 end
@@ -108,7 +85,7 @@ local function resolveColours(overrides)
     if type(overrides) ~= 'table' then overrides = {} end
 
     local colours = {}
-    for key in pairs(DEFAULTS) do
+    for key in pairs(COLOURS) do
         local value = overrides[key]
         if value ~= nil and not validHex(value) then
             warnOnce(('override:%s:%s'):format(key, tostring(value)), ('Theme override %q must be #RRGGBB; ignoring it.'):format(key))

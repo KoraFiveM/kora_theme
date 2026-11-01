@@ -13,18 +13,25 @@ local function normaliseHex(value)
     return value:upper()
 end
 
+local function serverPrimary()
+    return type(KoraThemeFile) == 'table' and normaliseHex(KoraThemeFile.colours.primary) or nil
+end
+
+-- The first preset is always the server primary from theme.json, so "default"
+-- tracks the file. Further presets come from theme.json's "presets" list.
 local function configuredPresets()
     local presets, seen = {}, {}
-    if type(PLAYER_THEME.presets) ~= 'table' then return presets end
-
-    for _, preset in ipairs(PLAYER_THEME.presets) do
-        local colour = type(preset) == 'table' and normaliseHex(preset.colour) or nil
-        local label = type(preset) == 'table' and preset.label or nil
+    local function add(label, colour)
+        colour = normaliseHex(colour)
         if colour and type(label) == 'string' and label ~= '' and #label <= 40 and not seen[colour] then
             seen[colour] = true
             presets[#presets + 1] = { label = label, colour = colour }
         end
     end
+
+    if type(KoraThemeFile) ~= 'table' then return presets end
+    add(KoraThemeFile.name or 'Server default', serverPrimary())
+    for _, preset in ipairs(KoraThemeFile.presets or {}) do add(preset.label, preset.colour) end
     return presets
 end
 
@@ -37,7 +44,7 @@ local function pickerState()
     return {
         enabled = ENABLED,
         selected = selectedColour,
-        default = type(QBThemeConfig.colors) == 'table' and normaliseHex(QBThemeConfig.colors.primary) or nil,
+        default = serverPrimary(),
         presets = configuredPresets(),
     }
 end

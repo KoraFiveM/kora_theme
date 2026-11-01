@@ -5,6 +5,8 @@ const values = new Map()
 const listeners = {}
 let fetches = 0
 let readyPings = 0
+// The browser loader must take every colour from theme.json, so the fixture is the real file.
+let themeJson = JSON.parse(require("node:fs").readFileSync(path.join(__dirname, "..", "theme.json"), "utf8"))
 
 global.document = {
   documentElement: {
@@ -23,13 +25,7 @@ global.fetch = async (url) => {
   }
   fetches += 1
   assert.equal(url, "https://cfx-nui-kora_theme/theme.json")
-  return { ok: true, json: async () => ({ colors: {
-    background: "#101010", surface: "#171717", surfacePopover: "#1B1B1B",
-    surfaceRaised: "#242424", surfaceHover: "#2A2A2A", foreground: "#F5F5F5",
-    mutedForeground: "#949494", border: "#343434", borderStrong: "#444444",
-    control: "#666666", controlHover: "#7A7A7A", primary: "#95FF00",
-    success: "#22C55E", warning: "#F59E0B", danger: "#EF4444", info: "#D4D4D4", armour: "#3B9EFF",
-  } }) }
+  return { ok: true, json: async () => themeJson }
 }
 
 require(path.join(__dirname, "..", "theme.js"))
@@ -55,5 +51,17 @@ setImmediate(async () => {
   await window.QBTheme.refresh()
   assert.equal(fetches, 2)
   assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
-  console.log("qbtheme browser loader: 12 assertions passed")
+
+  // Editing theme.json alone changes the output (no embedded fallback palette).
+  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: null } })
+  themeJson = { colors: { ...themeJson.colors, primary: "#1E90FF" } }
+  await window.QBTheme.refresh()
+  assert.equal(values.get("--primary"), "209.6 100% 55.9%")
+  themeJson = { colors: { primary: "#1E90FF" } }
+  values.clear()
+  await window.QBTheme.refresh()
+  assert.equal(values.get("--primary"), "209.6 100% 55.9%")
+  assert.equal(values.has("--background"), false)
+  assert.doesNotMatch(require("node:fs").readFileSync(path.join(__dirname, "..", "theme.js"), "utf8"), /#[0-9a-fA-F]{6}/)
+  console.log("qbtheme browser loader: 17 assertions passed")
 })
