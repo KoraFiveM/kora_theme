@@ -49,9 +49,7 @@ function QBTheme.refresh()
     return result
 end
 
-function QBTheme.tokens()
-    return tokens()
-end
+QBTheme.tokens = tokens
 
 RegisterNUICallback('qbtheme:ready', function(_, cb)
     -- theme.js loads the provider's static theme.json itself; this response

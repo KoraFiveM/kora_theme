@@ -12,10 +12,6 @@ local function validHex(value)
     return type(value) == 'string' and value:match('^#%x%x%x%x%x%x$') ~= nil
 end
 
-local function configuredColour(key)
-    return COLOURS[key]
-end
-
 local function round1(value)
     return math.floor(value * 10 + 0.5) / 10
 end
@@ -91,14 +87,14 @@ local function resolveColours(overrides)
             warnOnce(('override:%s:%s'):format(key, tostring(value)), ('Theme override %q must be #RRGGBB; ignoring it.'):format(key))
             value = nil
         end
-        colours[key] = value and value:upper() or configuredColour(key)
+        colours[key] = value and value:upper() or COLOURS[key]
     end
     return colours
 end
 
 local function getTokens(overrides)
     local c = resolveColours(overrides)
-    local tokens = {
+    return {
         background = hslToken(c.background),
         foreground = hslToken(c.foreground),
         card = hslToken(c.surface),
@@ -170,11 +166,10 @@ local function getTokens(overrides)
         ['duration-dialog'] = '180ms',
         ['ease-entry'] = 'cubic-bezier(0.16, 1, 0.3, 1)',
     }
-    return tokens
 end
 
 local function getPrimaryColor()
-    return configuredColour('primary')
+    return COLOURS.primary
 end
 
 exports('getTokens', getTokens)
