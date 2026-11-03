@@ -17,6 +17,10 @@ fail() {
 # server.cfg. Consumers reached only via a category ensure (ensure [test]) or not
 # ensured at all are not ordered here; their manifest dependency covers them.
 cfg="$workspace/server.cfg"
+if [ ! -f "$cfg" ]; then
+  echo "kora_theme consumer check: skipped (no server.cfg at $cfg; run inside a server checkout)"
+  exit 0
+fi
 theme_line=$(awk '$1 == "ensure" && $2 == "kora_theme" { print NR; exit }' "$cfg")
 [ -n "$theme_line" ] || fail "server.cfg does not ensure kora_theme"
 for resource in $consumers; do
