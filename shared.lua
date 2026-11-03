@@ -92,8 +92,56 @@ local function resolveColours(overrides)
     return colours
 end
 
+local function fontFile()
+    return type(KoraThemeFile) == 'table' and type(KoraThemeFile.resolveFont) == 'function' and KoraThemeFile or nil
+end
+
+-- One slot's choice, by precedence: a /config custom family, the /config
+-- dropdown (unless it is 'theme'), then theme.json. Returns the resolved font
+-- (stack nil for "default") and where it came from.
+local function chooseFont(slot, kind)
+    local file = fontFile()
+    local configured = type(QBThemeConfig) == 'table' and type(QBThemeConfig.fonts) == 'table' and QBThemeConfig.fonts or {}
+    local custom = type(configured.custom) == 'table' and configured.custom[slot] or nil
+    if type(custom) == 'string' and custom:match('%S') then
+        local font = file and file.resolveFont(custom, kind)
+        if font then return font, 'config' end
+        warnOnce(('font:%s:%s'):format(slot, custom), ('Custom %s font %q is not a plain font-family list; ignoring it.'):format(slot, custom))
+    end
+    local choice = configured[slot]
+    if type(choice) == 'string' and choice ~= 'theme' then
+        local font = file and file.resolveFont(choice, kind)
+        if font then return font, 'config' end
+        warnOnce(('font:%s:%s'):format(slot, choice), ('Configured %s font %q is unknown; ignoring it.'):format(slot, choice))
+    end
+    local fileValue = file and file.fonts and file.fonts[slot]
+    if fileValue and fileValue ~= 'default' then
+        local font = file.resolveFont(fileValue, kind)
+        if font then return font, 'theme.json' end
+    end
+    return { id = 'default', label = 'Default' }, 'default'
+end
+
+---Resolved fonts per slot: { id, label, stack, source }. "default" uses the
+---theme.css stack for body/mono; a default heading uses the body font.
+local function getFonts()
+    local defaults = fontFile() and KoraThemeFile.fontDefaults or {}
+    local fonts = {}
+    for _, slot in ipairs({ 'body', 'heading', 'mono' }) do
+        local kind = slot == 'mono' and 'mono' or 'sans'
+        local font, source = chooseFont(slot, kind)
+        font.source = source
+        if not font.stack then
+            font.stack = slot == 'heading' and fonts.body.stack or defaults[kind]
+        end
+        fonts[slot] = font
+    end
+    return fonts
+end
+
 local function getTokens(overrides)
     local c = resolveColours(overrides)
+    local fonts = getFonts()
     return {
         background = hslToken(c.background),
         foreground = hslToken(c.foreground),
@@ -146,8 +194,9 @@ local function getTokens(overrides)
         surface = hslToken(c.surface, 0.97),
         ['surface-panel'] = hslToken(c.surfaceRaised, 0.98),
         ['secondary-text'] = hslToken(c.info),
-        ['font-sans'] = 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        ['font-mono'] = '"SFMono-Regular", Consolas, "Liberation Mono", monospace',
+        ['font-sans'] = fonts.body.stack,
+        ['font-heading'] = fonts.heading.stack,
+        ['font-mono'] = fonts.mono.stack,
         space = '0.25rem',
         ['space-1'] = '0.25rem',
         ['space-2'] = '0.5rem',
@@ -173,4 +222,5 @@ local function getPrimaryColor()
 end
 
 exports('getTokens', getTokens)
+exports('getFonts', getFonts)
 exports('getPrimaryColor', getPrimaryColor)

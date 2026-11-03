@@ -4,8 +4,12 @@ local function decode(text)
     local function skip() pos = text:find('[^ \t\r\n]', pos) or #text + 1 end
     local value
     local function str()
-        local close = text:find('"', pos + 1, true)
-        local out = text:sub(pos + 1, close - 1)
+        local close = pos + 1
+        while text:sub(close, close) ~= '"' do
+            assert(close <= #text, 'unterminated string')
+            close = close + (text:sub(close, close) == '\\' and 2 or 1)
+        end
+        local out = text:sub(pos + 1, close - 1):gsub('\\(.)', '%1')
         pos = close + 1
         return out
     end

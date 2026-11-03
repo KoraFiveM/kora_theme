@@ -15,6 +15,7 @@ files {
     'theme.css',
     'theme.js',
     'theme.json',
+    'fonts/**',
     'web/index.html',
     'web/app.js',
     'web/style.css',

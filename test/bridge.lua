@@ -2,6 +2,7 @@ local root = debug.getinfo(1, 'S').source:sub(2):match('(.*/)') .. '../'
 local callbacks, handlers, sent = {}, {}, {}
 local lastOverrides
 local playerTheme = '#22C55E'
+local fonts = { body = { id = 'default', stack = 'Inter, sans-serif', source = 'default' } }
 
 _G.exports = {
     kora_theme = {
@@ -10,6 +11,7 @@ _G.exports = {
             return { primary = overrides == '#7C3AED' and '262.1 83.3% 57.8%' or '348 83.3% 47.1%' }
         end,
         getPlayerTheme = function() return playerTheme end,
+        getFonts = function() return fonts end,
     },
 }
 _G.GetCurrentResourceName = function() return 'consumer' end
@@ -35,15 +37,17 @@ equal(lastOverrides, '#7C3AED', 'refresh retains cached override')
 local response
 callbacks['qbtheme:ready']({}, function(value) response = value end)
 equal(response.overrides, '#7C3AED', 'ready returns the effective resource override')
+equal(response.fonts, fonts, 'ready returns the resolved server fonts')
 
 local before = #sent
 handlers.onClientResourceStart('unrelated')
 equal(#sent, before, 'unrelated restart ignored')
 handlers.onClientResourceStart('kora_theme')
-equal(#sent, before + 2, 'qbtheme restart reloads and reapplies tokens')
+equal(#sent, before + 3, 'qbtheme restart reloads and reapplies tokens and fonts')
 equal(lastOverrides, '#7C3AED', 'restart retains cached override')
-equal(sent[#sent - 1].action, 'qbtheme:refresh', 'restart reloads theme.json')
-equal(sent[#sent].action, 'qbtheme:override', 'restart reapplies effective override')
+equal(sent[#sent - 2].action, 'qbtheme:refresh', 'restart reloads theme.json')
+equal(sent[#sent - 1].action, 'qbtheme:override', 'restart reapplies effective override')
+equal(sent[#sent].action, 'qbtheme:fonts', 'restart resends the server fonts')
 
 QBTheme.apply({ warning = '#F59E0B' })
 equal(type(lastOverrides), 'table', 'semantic table override cached')
@@ -55,4 +59,10 @@ handlers['qbtheme:playerThemeChanged']()
 equal(lastOverrides.primary, '#3B82F6', 'player theme event refreshes consumer primary')
 equal(sent[#sent].action, 'qbtheme:override', 'player theme event updates browser')
 
-print('qbtheme bridge: 14 assertions passed')
+fonts = { body = { id = 'poppins', stack = '"Kora Poppins", sans-serif', source = 'config' } }
+handlers['qbtheme:fontsChanged']()
+equal(sent[#sent].action, 'qbtheme:fonts', 'font change message action')
+equal(sent[#sent].data.body.id, 'poppins', 'font change forwards the resolved fonts')
+equal(QBTheme.fonts(), fonts, 'QBTheme.fonts reads the provider export')
+
+print('qbtheme bridge: 20 assertions passed')
