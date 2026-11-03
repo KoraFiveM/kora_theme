@@ -40,7 +40,7 @@ await middleware(
   () => { throw new Error("theme.json request unexpectedly fell through") },
 )
 assert.match(String(headers["Content-Type"]), /application\/json/)
-assert.equal(JSON.parse(String(body)).colors.primary, "#95FF00")
+assert.equal(JSON.parse(String(body)).colors.primary, "#A8FF00")
 
 for (const [url, type, check] of [
   ["/@qbtheme/fonts/fonts.css", /text\/css/, (value) => assert.match(String(value), /@font-face/)],

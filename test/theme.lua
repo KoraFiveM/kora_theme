@@ -30,10 +30,10 @@ equal(tokens.background, '0 0% 6.3%', 'background HSL')
 assert(tokens['brand-soft'] == tokens.primary .. ' / 0.14', 'soft primary')
 assert(tokens['primary-foreground'] == '0 0% 100%' or tokens['primary-foreground'] == '0 0% 6.3%', 'primary foreground contrast')
 
-equal(configuredPrimary, '#95FF00', 'theme.json primary is kora green')
-equal(tokens.primary, '84.9 100% 50%', 'default primary HSL')
+equal(configuredPrimary, '#A8FF00', 'theme.json primary is kora green')
+equal(tokens.primary, '80.5 100% 50%', 'default primary HSL')
 equal(tokens['primary-foreground'], '0 0% 6.3%', 'dark text on kora green')
-equal(tokens['brand-hover'], '84.9 100% 44.9%', 'brand hover derives from green')
+equal(tokens['brand-hover'], '80.5 100% 44.9%', 'brand hover derives from green')
 equal(KoraThemeFile.name, 'Kora green', 'primary name comes from theme.json')
 equal(KoraThemeFile.presets[1].label, 'Crimson', 'presets come from theme.json')
 equal(QBThemeConfig.colors, nil, 'config.lua holds no colours')
@@ -79,7 +79,7 @@ end
 
 local catalogJson = assert(io.open(root .. 'fonts/catalog.json', 'r')):read('*a')
 local original = assert(io.open(root .. 'theme.json', 'r')):read('*a')
-local fixture = boot({ ['theme.json'] = (original:gsub('#95FF00', '#1E90FF')), ['fonts/catalog.json'] = catalogJson })
+local fixture = boot({ ['theme.json'] = (original:gsub('#A8FF00', '#1E90FF')), ['fonts/catalog.json'] = catalogJson })
 equal(fixture.getPrimaryColor(), '#1E90FF', 'getPrimaryColor follows theme.json')
 equal(fixture.getTokens().primary, '209.6 100% 55.9%', 'getTokens follows theme.json')
 equal(fixture.getTokens('#DC143C').primary, '348 83.3% 47.1%', 'overrides still win')
@@ -88,11 +88,11 @@ local printed = {}
 local realPrint = print
 _G.print = function(message) printed[#printed + 1] = message end
 local missing = boot({})
-equal(missing.getPrimaryColor(), '#95FF00', 'missing theme.json uses the emergency default')
+equal(missing.getPrimaryColor(), '#A8FF00', 'missing theme.json uses the emergency default')
 assert(printed[1] and printed[1]:find('^%^3%[kora_theme%]'), 'missing theme.json warns')
 printed = {}
 local broken = boot({ ['theme.json'] = '{ not json' })
-equal(broken.getPrimaryColor(), '#95FF00', 'invalid theme.json uses the emergency default')
+equal(broken.getPrimaryColor(), '#A8FF00', 'invalid theme.json uses the emergency default')
 assert(printed[1] and printed[1]:find('^%^3%[kora_theme%]'), 'invalid theme.json warns')
 printed = {}
 local partial = boot({ ['theme.json'] = '{"colors":{"primary":"#123456","danger":"red"}}' })

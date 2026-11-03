@@ -52,7 +52,7 @@ setImmediate(async () => {
   assert.equal(values.get("--background"), "0 0% 6.3%")
 
   listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: { primary: "bad", warning: "#FDE047" } } })
-  assert.equal(values.get("--primary"), "84.9 100% 50%")
+  assert.equal(values.get("--primary"), "80.5 100% 50%")
   assert.equal(values.get("--primary-foreground"), "0 0% 6.3%")
   assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
 

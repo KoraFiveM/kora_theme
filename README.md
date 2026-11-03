@@ -32,7 +32,7 @@ variables are unset. The only built-in colours are the emergency defaults in
 colour, shown as the first picker preset), `presets` (extra `/theme` picker
 colours, each `{ "label", "colour" }`) and `fonts` (see below).
 
-The default primary is Kora green `#95FF00`; the contrast token puts dark text
+The default primary is Kora green `#A8FF00`; the contrast token puts dark text
 on it. Running UI resources receive the new tokens without being restarted. A
 consumer that owns an approved accent can call `QBTheme.apply('#RRGGBB')`;
 `QBTheme.refresh()` reapplies the cached override; `QBTheme.fonts()` returns

@@ -73,7 +73,7 @@ callbacks['qbtheme:ready']({}, function(value) ready = value end)
 equal(ready.overrides, nil, 'ready response reports server default')
 equal(type(ready.picker.presets), 'table', 'ready response includes presets')
 equal(ready.picker.presets[1].label, 'Kora green', 'picker lists Kora green first')
-equal(ready.picker.default, '#95FF00', 'picker default is theme.json primary')
+equal(ready.picker.default, '#A8FF00', 'picker default is theme.json primary')
 equal(ready.picker.presets[2].label, 'Crimson', 'picker lists theme.json presets after the default')
 
 equal(ready.fonts.body.stack, KoraThemeFile.fontDefaults.sans, 'ready response includes resolved fonts')
