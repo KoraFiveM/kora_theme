@@ -40,6 +40,11 @@ local function getPlayerTheme()
     return selectedColour
 end
 
+local function resolvedFonts()
+    local ok, fonts = pcall(function() return exports[GetCurrentResourceName()]:getFonts() end)
+    return ok and type(fonts) == 'table' and fonts or nil
+end
+
 local function pickerState()
     return {
         enabled = ENABLED,
@@ -97,7 +102,13 @@ exports('getPlayerTheme', getPlayerTheme)
 exports('setPlayerTheme', setPlayerTheme)
 
 RegisterNUICallback('qbtheme:ready', function(_, cb)
-    cb({ overrides = selectedColour, picker = pickerState() })
+    cb({ overrides = selectedColour, picker = pickerState(), fonts = resolvedFonts() })
+end)
+
+-- config.lua raises this when an admin changes a font in /config; consumers'
+-- bridge.lua copies handle their own frames, this updates the picker frame.
+AddEventHandler('qbtheme:fontsChanged', function()
+    SendNUIMessage({ action = 'qbtheme:fonts', data = resolvedFonts() })
 end)
 
 RegisterNUICallback('qbtheme:set', function(payload, cb)

@@ -5,6 +5,9 @@ local registered = {}
 
 _G.exports = setmetatable({}, {
     __call = function(_, name, fn) registered[name] = fn end,
+    __index = function(_, resource)
+        if resource == 'kora_theme' then return { getFonts = function() return registered.getFonts() end } end
+    end,
 })
 _G.GetCurrentResourceName = function() return 'kora_theme' end
 _G.LoadResourceFile = function(_, path)
@@ -26,6 +29,7 @@ _G.SetNuiFocus = function(keyboard, cursor) focus[#focus + 1] = { keyboard, curs
 dofile(root .. 'test/json.lua')
 dofile(root .. 'theme_loader.lua')
 dofile(root .. 'config.lua')
+dofile(root .. 'shared.lua')
 dofile(root .. 'client/main.lua')
 
 local assertions = 0
@@ -71,6 +75,15 @@ equal(type(ready.picker.presets), 'table', 'ready response includes presets')
 equal(ready.picker.presets[1].label, 'Kora green', 'picker lists Kora green first')
 equal(ready.picker.default, '#95FF00', 'picker default is theme.json primary')
 equal(ready.picker.presets[2].label, 'Crimson', 'picker lists theme.json presets after the default')
+
+equal(ready.fonts.body.stack, KoraThemeFile.fontDefaults.sans, 'ready response includes resolved fonts')
+
+QBThemeConfig.fonts.body = 'poppins'
+handlers['qbtheme:fontsChanged']()
+equal(messages[#messages].action, 'qbtheme:fonts', 'font change updates the picker frame')
+equal(messages[#messages].data.body.id, 'poppins', 'picker frame receives the configured font')
+equal(messages[#messages].data.body.source, 'config', 'picker frame receives the font source')
+QBThemeConfig.fonts.body = 'theme'
 
 callbacks['qbtheme:close']({}, function() end)
 equal(focus[#focus][1], false, 'close releases keyboard focus')

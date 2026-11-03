@@ -77,8 +77,9 @@ local function boot(files)
     return out
 end
 
+local catalogJson = assert(io.open(root .. 'fonts/catalog.json', 'r')):read('*a')
 local original = assert(io.open(root .. 'theme.json', 'r')):read('*a')
-local fixture = boot({ ['theme.json'] = (original:gsub('#95FF00', '#1E90FF')) })
+local fixture = boot({ ['theme.json'] = (original:gsub('#95FF00', '#1E90FF')), ['fonts/catalog.json'] = catalogJson })
 equal(fixture.getPrimaryColor(), '#1E90FF', 'getPrimaryColor follows theme.json')
 equal(fixture.getTokens().primary, '209.6 100% 55.9%', 'getTokens follows theme.json')
 equal(fixture.getTokens('#DC143C').primary, '348 83.3% 47.1%', 'overrides still win')
@@ -107,4 +108,111 @@ for _, path in ipairs({ 'config.lua', 'shared.lua', 'client/main.lua', 'client/b
     assert(not source:find('#%x%x%x%x%x%x'), path .. ' must not embed colour hex values')
 end
 
-print('qbtheme: 40 assertions passed')
+-- Fonts: theme.json "fonts" + fonts/catalog.json, overridden by QBThemeConfig.fonts.
+local fontAssertions = 0
+local function check(actual, expected, message) fontAssertions = fontAssertions + 1 equal(actual, expected, message) end
+local catalog = json.decode(catalogJson)
+local cssDefault = function(name) return css:match('%-%-' .. name:gsub('%-', '%%-') .. ':%s*([^;]+);') end
+check(cssDefault('font-sans'), catalog.defaults.sans, 'theme.css --font-sans matches the catalog default')
+check(cssDefault('font-heading'), catalog.defaults.sans, 'theme.css --font-heading defaults to the body stack')
+check(cssDefault('font-mono'), catalog.defaults.mono, 'theme.css --font-mono matches the catalog default')
+check(cssDefault('font-sans'), 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', 'default body stack is unchanged')
+check(cssDefault('font-mono'), '"SFMono-Regular", Consolas, "Liberation Mono", monospace', 'default mono stack is unchanged')
+check(css:find('@import url("fonts/fonts.css");', 1, true) ~= nil, true, 'theme.css imports the bundled fonts')
+check(css:find(':where(h1, h2, h3, h4, h5, h6) { font-family: var(--font-heading); }', 1, true) ~= nil, true, 'headings use --font-heading')
+check(read('shared.lua'):find('Inter, ui%-sans%-serif'), nil, 'shared.lua does not hardcode the font stack')
+
+local fontsCss = read('fonts/fonts.css')
+local faces = {}
+for block in fontsCss:gmatch('@font%-face%s*(%b{})') do
+    local family = block:match('font%-family:%s*"([^"]+)"')
+    local url = block:match('url%("([^"]+)"%)')
+    check(block:find('font-display: swap;', 1, true) ~= nil, true, family .. ' uses font-display swap')
+    check(url:match('^[a-z0-9-]+/[a-z0-9-]+%.woff2$') ~= nil, true, family .. ' uses a relative woff2 url')
+    check(io.open(root .. 'fonts/' .. url, 'rb') ~= nil, true, url .. ' exists')
+    faces[family] = true
+end
+for _, font in ipairs(catalog.fonts) do
+    check(faces[font.family], true, font.id .. ' has an @font-face rule')
+    check(font.stack:sub(1, #font.family + 2), '"' .. font.family .. '"', font.id .. ' stack starts with its bundled family')
+    check(font.family:sub(1, 5), 'Kora ', font.id .. ' family is prefixed so the default stack never changes')
+    check(read('fonts/' .. font.id .. '/OFL.txt'):find('SIL Open Font License, Version 1.1', 1, true) ~= nil, true, font.id .. ' ships its OFL licence')
+end
+
+check(read('fxmanifest.lua'):find("'fonts/**',", 1, true) ~= nil, true, 'fxmanifest ships the fonts folder')
+
+local defaults = registered.getFonts()
+check(KoraThemeFile.fonts.body, 'default', 'theme.json body font defaults')
+check(defaults.body.stack, catalog.defaults.sans, 'default body stack')
+check(defaults.heading.stack, catalog.defaults.sans, 'default heading stack')
+check(defaults.mono.stack, catalog.defaults.mono, 'default mono stack')
+check(defaults.body.source, 'default', 'default body source')
+check(tokens['font-sans'], catalog.defaults.sans, 'getTokens font-sans')
+check(tokens['font-heading'], catalog.defaults.sans, 'getTokens font-heading')
+check(tokens['font-mono'], catalog.defaults.mono, 'getTokens font-mono')
+
+local function withFonts(fonts)
+    local themed = original:gsub('"presets"', ('"fonts": %s,\n  "presets"'):format(fonts), 1)
+    return boot({ ['theme.json'] = themed, ['fonts/catalog.json'] = catalogJson })
+end
+printed = {}
+_G.print = function(message) printed[#printed + 1] = message end
+local themed = withFonts('{ "heading": "oswald", "body": "Poppins", "mono": "jetbrains-mono" }')
+local themedFonts = themed.getFonts()
+check(themedFonts.body.id, 'poppins', 'theme.json catalog id (case-insensitive)')
+check(themedFonts.body.source, 'theme.json', 'theme.json font source')
+check(themedFonts.heading.stack, catalog.fonts[6].stack, 'theme.json heading stack')
+check(themedFonts.mono.id, 'jetbrains-mono', 'theme.json mono id')
+check(themed.getTokens()['font-sans'], themedFonts.body.stack, 'getTokens follows theme.json fonts')
+check(#printed, 0, 'valid fonts do not warn')
+
+local followed = withFonts('{ "body": "roboto" }').getFonts()
+check(followed.heading.stack, followed.body.stack, 'default heading follows the body font')
+check(followed.heading.source, 'default', 'unset heading reports the default source')
+
+local custom = withFonts('{ "body": "Arial, \\"Helvetica Neue\\", sans-serif", "heading": "url(evil)", "mono": "a;}body{" }')
+check(KoraThemeFile.fonts.body, 'Arial, "Helvetica Neue", sans-serif', 'custom family list accepted')
+check(custom.getFonts().body.id, 'custom', 'custom font id')
+check(custom.getFonts().body.stack, 'Arial, "Helvetica Neue", sans-serif, ' .. catalog.defaults.sans, 'custom stack keeps the default fallbacks')
+check(KoraThemeFile.fonts.heading, 'default', 'url() is rejected')
+check(KoraThemeFile.fonts.mono, 'default', 'CSS syntax is rejected')
+check(#printed, 2, 'each rejected font warns')
+check(printed[1]:find('^%^3%[kora_theme%]') ~= nil, true, 'font warnings use the theme.json style')
+check(KoraThemeFile.resolveFont(('a'):rep(201), 'sans'), nil, 'overlong family rejected')
+check(KoraThemeFile.resolveFont('"Unbalanced', 'sans'), nil, 'unbalanced quotes rejected')
+check(KoraThemeFile.resolveFont('<style>', 'sans'), nil, 'angle brackets rejected')
+check(KoraThemeFile.resolveFont('123', 'sans'), nil, 'family needs a letter')
+printed = {}
+withFonts('"poppins"')
+check(#printed, 1, 'non-object fonts warns')
+check(KoraThemeFile.fonts.body, 'default', 'non-object fonts falls back')
+printed = {}
+local noCatalog = boot({ ['theme.json'] = (original:gsub('"presets"', '"fonts": { "body": "poppins" },\n  "presets"', 1)) })
+check(noCatalog.getFonts().mono.stack, catalog.defaults.mono, 'missing catalog keeps the emergency defaults')
+check(noCatalog.getFonts().body.id, 'custom', 'missing catalog treats ids as plain family names')
+_G.print = realPrint
+
+-- /config overrides win over theme.json; custom family lists win over the dropdown.
+withFonts('{ "heading": "oswald", "body": "poppins" }')
+QBThemeConfig.fonts = { heading = 'theme', body = 'roboto', mono = 'roboto-mono', custom = { heading = '', body = '', mono = '' } }
+local configured = registered.getFonts()
+check(configured.body.id, 'roboto', 'config dropdown overrides theme.json')
+check(configured.body.source, 'config', 'config source')
+check(configured.heading.id, 'oswald', "'theme' follows theme.json")
+check(configured.mono.id, 'roboto-mono', 'config mono')
+QBThemeConfig.fonts.custom.body = 'Comic Sans MS'
+QBThemeConfig.fonts.heading = 'default'
+configured = registered.getFonts()
+check(configured.body.stack, 'Comic Sans MS, ' .. catalog.defaults.sans, 'custom family overrides the dropdown')
+check(configured.heading.stack, configured.body.stack, "config 'default' heading follows the body font")
+check(configured.heading.source, 'config', 'explicit default heading is a config choice')
+_G.print = function() end
+QBThemeConfig.fonts.custom.body = 'x;}'
+QBThemeConfig.fonts.mono = 'not-a-font!'
+configured = registered.getFonts()
+_G.print = realPrint
+check(configured.body.id, 'roboto', 'invalid custom family falls back to the dropdown')
+check(configured.mono.stack, catalog.defaults.mono, 'invalid dropdown value falls back to theme.json/default')
+check(registered.getTokens()['font-sans'], configured.body.stack, 'getTokens uses config fonts')
+
+print(('qbtheme: %d assertions passed'):format(40 + fontAssertions))

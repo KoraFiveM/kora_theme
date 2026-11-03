@@ -51,12 +51,28 @@ end
 
 QBTheme.tokens = tokens
 
+---Resolved server fonts from kora_theme (theme.json plus /config overrides).
+function QBTheme.fonts()
+    local ok, result = pcall(function()
+        return exports[PROVIDER]:getFonts()
+    end)
+    return ok and type(result) == 'table' and result or nil
+end
+
+local function sendFonts()
+    SendNUIMessage({ action = 'qbtheme:fonts', data = QBTheme.fonts() })
+end
+
 RegisterNUICallback('qbtheme:ready', function(_, cb)
     -- theme.js loads the provider's static theme.json itself; this response
-    -- only adds the player's saved preference and any consumer-owned accent.
+    -- only adds the player's saved preference, any consumer-owned accent and
+    -- the resolved server fonts (which include /config overrides).
     readPlayerOverride()
-    cb({ overrides = effectiveOverrides() })
+    cb({ overrides = effectiveOverrides(), fonts = QBTheme.fonts() })
 end)
+
+-- Raised by kora_theme when an admin changes a font in /config.
+AddEventHandler('qbtheme:fontsChanged', sendFonts)
 
 AddEventHandler('qbtheme:playerThemeChanged', function()
     readPlayerOverride()
@@ -69,6 +85,7 @@ AddEventHandler('onClientResourceStart', function(resource)
         readPlayerOverride()
         QBTheme.refresh()
         QBTheme.apply(currentOverrides)
+        sendFonts()
     end)
 end)
 
