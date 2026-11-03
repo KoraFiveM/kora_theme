@@ -1,6 +1,6 @@
 # kora_theme
 
-Shared dark design system for qbcore2 browser UIs. Start this resource before
+Shared dark design system for Kora browser UIs. Start this resource before
 all UI resources and declare `dependency 'qbtheme'` in each consumer.
 
 Browser pages load `https://cfx-nui-kora_theme/theme.css` and `theme.js`. Resources
