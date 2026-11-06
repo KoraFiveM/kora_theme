@@ -221,6 +221,13 @@ local function getPrimaryColor()
     return COLOURS.primary
 end
 
+---Resolved palette as #RRGGBB strings keyed like theme.json's "colors" (primary, foreground,
+---background, ...). Accepts the same overrides as getTokens; invalid overrides are ignored.
+local function getColours(overrides)
+    return resolveColours(overrides)
+end
+
 exports('getTokens', getTokens)
+exports('getColours', getColours)
 exports('getFonts', getFonts)
 exports('getPrimaryColor', getPrimaryColor)
