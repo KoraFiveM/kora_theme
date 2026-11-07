@@ -1,4 +1,10 @@
 local COLOURS = type(KoraThemeFile) == 'table' and KoraThemeFile.colours or {}
+local SHAPE = type(KoraThemeFile) == 'table' and KoraThemeFile.shape or {}
+-- Same values as theme.js; "none" is a zero shadow so it stays valid inside comma lists.
+local SHADOWS = ({
+    none = { low = '0 0 #0000', floating = '0 0 #0000', modal = '0 0 #0000' },
+    soft = { low = '0 2px 8px rgb(0 0 0 / 24%)', floating = '0 10px 28px rgb(0 0 0 / 40%)', modal = '0 20px 56px rgb(0 0 0 / 50%)' },
+})[SHAPE.shadows] or { low = '0 4px 12px rgb(0 0 0 / 28%)', floating = '0 12px 32px rgb(0 0 0 / 42%)', modal = '0 24px 64px rgb(0 0 0 / 55%)' }
 
 local warned = {}
 
@@ -203,13 +209,13 @@ local function getTokens(overrides)
         ['space-3'] = '0.75rem',
         ['space-4'] = '1rem',
         ['space-6'] = '1.5rem',
-        ['radius-sm'] = '0.375rem',
-        radius = '0.625rem',
-        ['radius-lg'] = '0.8125rem',
+        ['radius-sm'] = SHAPE.radius and ('%dpx'):format(math.floor(SHAPE.radius * 0.75 + 0.5)) or '0.375rem',
+        radius = SHAPE.radius and ('%dpx'):format(SHAPE.radius) or '0.625rem',
+        ['radius-lg'] = SHAPE.radius and ('%dpx'):format(math.floor(SHAPE.radius * 1.25 + 0.5)) or '0.8125rem',
         ['radius-full'] = '9999px',
-        ['shadow-low'] = '0 4px 12px rgb(0 0 0 / 28%)',
-        ['shadow-floating'] = '0 12px 32px rgb(0 0 0 / 42%)',
-        ['shadow-modal'] = '0 24px 64px rgb(0 0 0 / 55%)',
+        ['shadow-low'] = SHADOWS.low,
+        ['shadow-floating'] = SHADOWS.floating,
+        ['shadow-modal'] = SHADOWS.modal,
         ['duration-fast'] = '120ms',
         ['duration-popover'] = '160ms',
         ['duration-dialog'] = '180ms',

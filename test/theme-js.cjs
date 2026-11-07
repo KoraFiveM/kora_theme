@@ -43,6 +43,10 @@ setImmediate(async () => {
   assert.equal(readyPings, 1)
   assert.equal(values.get("--primary"), "142.1 70.6% 45.3%")
   assert.equal(values.get("--background"), "0 0% 6.3%")
+  assert.equal(values.get("--radius"), "8px")
+  assert.equal(values.get("--radius-sm"), "6px")
+  assert.equal(values.get("--radius-lg"), "10px")
+  assert.equal(values.get("--shadow-floating"), "0 10px 28px rgb(0 0 0 / 40%)")
 
   listeners.message({ origin: "https://untrusted.example", data: { action: "qbtheme:override", data: "#7C3AED" } })
   assert.equal(values.get("--primary"), "142.1 70.6% 45.3%")

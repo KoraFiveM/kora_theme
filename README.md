@@ -28,7 +28,8 @@ variables are unset. The only built-in colours are the emergency defaults in
 `theme_loader.lua`, used (with a `^3[kora_theme]` console warning) when
 `theme.json` is missing or invalid, or per key when one value is not `#RRGGBB`.
 
-`theme.json` keys: `colors` (the semantic palette), `name` (label of the primary
+`theme.json` keys: `colors` (the semantic palette), `shape` (corners and
+shadows, below), `name` (label of the primary
 colour, shown as the first picker preset), `presets` (extra `/theme` picker
 colours, each `{ "label", "colour" }`) and `fonts` (see below).
 
@@ -37,6 +38,19 @@ on it. Running UI resources receive the new tokens without being restarted. A
 consumer that owns an approved accent can call `QBTheme.apply('#RRGGBB')`;
 `QBTheme.refresh()` reapplies the cached override; `QBTheme.fonts()` returns
 the resolved server fonts.
+
+## Shape (corners and shadows)
+
+```json
+"shape": { "radius": 8, "shadows": "soft" }
+```
+
+- `radius`: base corner size in px (0 to 24). Small and large corners scale from it.
+- `shadows`: `"soft"` (light shadows on menus and dialogs) or `"none"`.
+
+Both are optional; leaving `shape` out keeps the old look (10px corners, heavier
+shadows). Every UI reads `--radius`, `--radius-sm`, `--radius-lg` and
+`--shadow-low/floating/modal`, so these two values restyle all of them.
 
 ## Fonts
 
@@ -124,6 +138,7 @@ over the player's general preference.
 
 - `exports.kora_theme:getTokens(overrides?)`
 - `exports.kora_theme:getPrimaryColor()`
+- `exports.kora_theme:getColours(overrides?)` → resolved `#RRGGBB` palette keyed like `theme.json`'s `colors`
 - `exports.kora_theme:getFonts()` → `{ body, heading, mono }`, each
   `{ id, label, stack, source }` (`source` is `config`, `theme.json` or `default`)
 - `exports.kora_theme:getPlayerTheme()` (client)

@@ -133,11 +133,33 @@ elseif configuredFonts then
     end
 end
 
+-- theme.json "shape": radius (px, 0-24) and shadows ("none" or "soft"). Both are
+-- optional; a missing or invalid value leaves the theme.css default.
+local shape = {}
+local configuredShape = themeData and themeData.shape
+if configuredShape ~= nil and type(configuredShape) ~= 'table' then
+    warn('theme.json "shape" must be an object; using the default corners and shadows.')
+elseif configuredShape then
+    local radius = configuredShape.radius
+    if type(radius) == 'number' then
+        shape.radius = math.max(0, math.min(24, math.floor(radius + 0.5)))
+    elseif radius ~= nil then
+        warn('theme.json shape.radius must be a number of pixels; using the default.')
+    end
+    local shadows = configuredShape.shadows
+    if shadows == 'none' or shadows == 'soft' then
+        shape.shadows = shadows
+    elseif shadows ~= nil then
+        warn('theme.json shape.shadows must be "none" or "soft"; using the default.')
+    end
+end
+
 KoraThemeFile = {
     source = source, -- 'theme.json' or 'emergency'
     colours = colours,
     name = name, -- label for the primary colour, shown as the first picker preset
     presets = presets, -- extra picker presets from theme.json
+    shape = shape, -- validated theme.json shape: { radius = px?, shadows = 'none'|'soft'? }
     fonts = fonts, -- validated theme.json font values per slot (heading, body, mono)
     fontSlots = FONT_SLOTS, -- slot -> kind ('sans' or 'mono')
     fontDefaults = fontDefaults, -- kind -> default stack, matching theme.css

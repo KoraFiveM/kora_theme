@@ -1,6 +1,7 @@
 {
   "name": "Kora green",
   "fonts": { "heading": "default", "body": "default", "mono": "default" },
+  "shape": { "radius": 8, "shadows": "soft" },
   "colors": {
     "background": "#101010",
     "surface": "#171717",
