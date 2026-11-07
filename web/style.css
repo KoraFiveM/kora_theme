@@ -33,12 +33,14 @@ input {
 
 .panel {
   width: min(28rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
   box-sizing: border-box;
   padding: 1.25rem;
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius-lg);
   background: hsl(var(--surface-panel));
   box-shadow: var(--shadow-modal);
+  overflow-y: auto;
   transform: translateY(0.5rem) scale(0.98);
   transition: transform var(--duration-dialog) var(--ease-entry);
 }
