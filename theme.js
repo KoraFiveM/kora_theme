@@ -30,7 +30,13 @@
   };
   const shapeKeys = ["radius", "radius-sm", "radius-lg", "shadow-low", "shadow-floating", "shadow-modal"];
   let configured = {};
+  let loaded = false;
   let overrides = null;
+  // A page without the Lua bridge (the loading screen) sets the player's colour itself:
+  // window.QBThemePagePrimary = "#RRGGBB" (or null), then dispatches "qbtheme:page-primary"
+  // on window when it changes. Every copy of this script on the page follows it. A bridge
+  // override, when there is one, still wins.
+  const pagePrimary = () => (hex.test(window.QBThemePagePrimary || "") ? window.QBThemePagePrimary : null);
   let fileFonts = {};
   let serverFonts = null;
 
@@ -167,9 +173,10 @@
 
   function applyConfigured() {
     const colours = { ...configured };
-    if (typeof overrides === "string" && hex.test(overrides)) colours.primary = overrides;
-    else if (overrides && typeof overrides === "object" && !Array.isArray(overrides)) {
-      for (const role of roles) if (hex.test(overrides[role] || "")) colours[role] = overrides[role];
+    const chosen = overrides ?? pagePrimary();
+    if (typeof chosen === "string" && hex.test(chosen)) colours.primary = chosen;
+    else if (chosen && typeof chosen === "object" && !Array.isArray(chosen)) {
+      for (const role of roles) if (hex.test(chosen[role] || "")) colours[role] = chosen[role];
     }
     applyTokens(tokensFrom(colours));
   }
@@ -202,6 +209,7 @@
       const payload = response.ok && await response.json();
       if (!payload || !payload.colors || typeof payload.colors !== "object") throw new Error("invalid theme.json");
       configured = payload.colors;
+      loaded = true;
       fileFonts = await fontsFrom(payload.fonts);
       applyShape(payload.shape);
       applyConfigured();
@@ -225,6 +233,11 @@
     } else if (event.data?.action === "qbtheme:refresh") {
       void loadTheme();
     }
+  });
+
+  // Before theme.json has loaded there is no palette to apply to; loadTheme picks the colour up then.
+  window.addEventListener("qbtheme:page-primary", () => {
+    if (loaded) applyConfigured();
   });
 
   window.QBTheme = Object.freeze({ applyTokens, refresh: () => loadTheme() });

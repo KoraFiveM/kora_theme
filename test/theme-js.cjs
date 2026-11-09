@@ -74,6 +74,21 @@ setImmediate(async () => {
   await window.QBTheme.refresh()
   assert.equal(values.get("--primary"), "209.6 100% 55.9%")
   assert.equal(values.has("--background"), false)
+
+  // A bridge-free page (the loading screen) sets the player's colour itself; a bridge override still wins.
+  window.QBThemePagePrimary = "#7C3AED"
+  listeners["qbtheme:page-primary"]()
+  assert.equal(values.get("--primary"), "262.1 83.3% 57.8%")
+  await window.QBTheme.refresh()
+  assert.equal(values.get("--primary"), "262.1 83.3% 57.8%", "a theme.json reload keeps the page colour")
+  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: "#22C55E" } })
+  assert.equal(values.get("--primary"), "142.1 70.6% 45.3%")
+  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: null } })
+  window.QBThemePagePrimary = "not a colour"
+  listeners["qbtheme:page-primary"]()
+  assert.equal(values.get("--primary"), "209.6 100% 55.9%", "an invalid page colour falls back to theme.json")
+  window.QBThemePagePrimary = null
+
   assert.doesNotMatch(require("node:fs").readFileSync(path.join(__dirname, "..", "theme.js"), "utf8"), /#[0-9a-fA-F]{6}/)
 
   // Default theme.json fonts leave theme.css in charge and skip the catalog.
@@ -125,5 +140,5 @@ setImmediate(async () => {
   await new Promise((resolve) => setImmediate(resolve))
   assert.equal(values.get("--font-sans"), stackOf("montserrat"))
   assert.equal(values.get("--font-heading"), stackOf("montserrat"))
-  console.log("qbtheme browser loader: 36 assertions passed")
+  console.log("qbtheme browser loader: 41 assertions passed")
 })
