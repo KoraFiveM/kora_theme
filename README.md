@@ -1,7 +1,7 @@
 # kora_theme
 
 Shared dark design system for qbcore2 browser UIs. Start this resource before
-all UI resources and declare `dependency 'qbtheme'` in each consumer.
+all UI resources and declare `dependency 'kora_theme'` in each consumer.
 
 Browser pages load `https://cfx-nui-kora_theme/theme.css` and `theme.js`. Resources
 with a persistent private UI frame import `@kora_theme/client/bridge.lua` for live
@@ -35,8 +35,8 @@ colours, each `{ "label", "colour" }`) and `fonts` (see below).
 
 The default primary is Kora green `#95FF00`; the contrast token puts dark text
 on it. Running UI resources receive the new tokens without being restarted. A
-consumer that owns an approved accent can call `QBTheme.apply('#RRGGBB')`;
-`QBTheme.refresh()` reapplies the cached override; `QBTheme.fonts()` returns
+consumer that owns an approved accent can call `KoraTheme.apply('#RRGGBB')`;
+`KoraTheme.refresh()` reapplies the cached override; `KoraTheme.fonts()` returns
 the resolved server fonts.
 
 ## Shape (corners and shadows)
@@ -98,14 +98,14 @@ from dropdowns. **Server default (theme.json)** (the default) follows
 `theme.json`. With **Advanced** on, **Custom … font family** text fields
 accept a font-family list that overrides the dropdown for that slot (the font
 must be installed on the player's PC or bundled here). These settings are
-stored in `QBThemeConfig.fonts` (`config.local.lua`) and apply live.
+stored in `KoraThemeConfig.fonts` (`config.local.lua`) and apply live.
 
 Precedence per slot: custom family > dropdown > `theme.json` > built-in default.
 
 Live path: kora_lib syncs the change to every client → `config.lua` raises the
-local `qbtheme:fontsChanged` event → each consumer's `client/bridge.lua` sends
-`qbtheme:fonts` (the `getFonts()` result) to its NUI frame → `theme.js` sets
-the variables. The `qbtheme:ready` callback also returns `fonts`, so newly
+local `kora_theme:fontsChanged` event → each consumer's `client/bridge.lua` sends
+`kora_theme:fonts` (the `getFonts()` result) to its NUI frame → `theme.js` sets
+the variables. The `kora_theme:ready` callback also returns `fonts`, so newly
 opened UIs pick up the admin choice; bridge-free pages (loading screens)
 follow `theme.json`.
 
@@ -121,17 +121,17 @@ follow `theme.json`.
 
 ## Player themes
 
-Player themes are enabled by default in `QBThemeConfig.playerTheme`. Running
+Player themes are enabled by default in `KoraThemeConfig.playerTheme`. Running
 `/theme` opens the colour picker; `/theme #7C3AED` applies a colour directly,
 and `/theme reset` restores the server default. The selected primary colour is
 saved in client KVP storage, so it follows the player's game installation and
 is not written to the character database or sent to the server.
 
 `reset` returns to the primary in `theme.json`. Set
-`QBThemeConfig.playerTheme.enabled = false` to disable personal themes. The
+`KoraThemeConfig.playerTheme.enabled = false` to disable personal themes. The
 command name and KVP key can be changed in `config.lua`; picker presets come
 from `theme.json`.
-Consumer-owned overrides passed through `QBTheme.apply` still take precedence
+Consumer-owned overrides passed through `KoraTheme.apply` still take precedence
 over the player's general preference.
 
 ## Exports

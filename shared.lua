@@ -107,7 +107,7 @@ end
 -- (stack nil for "default") and where it came from.
 local function chooseFont(slot, kind)
     local file = fontFile()
-    local configured = type(QBThemeConfig) == 'table' and type(QBThemeConfig.fonts) == 'table' and QBThemeConfig.fonts or {}
+    local configured = type(KoraThemeConfig) == 'table' and type(KoraThemeConfig.fonts) == 'table' and KoraThemeConfig.fonts or {}
     local custom = type(configured.custom) == 'table' and configured.custom[slot] or nil
     if type(custom) == 'string' and custom:match('%S') then
         local font = file and file.resolveFont(custom, kind)

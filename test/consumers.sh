@@ -60,8 +60,8 @@ for resource in $page_consumers; do
     grep -Eq "import [A-Za-z_]+ from ['\"]\.\./\.\./kora_theme/vite-plugin\.mjs['\"]" "$root/web/vite.config.ts" || fail "$resource does not use kora_theme's Vite helper"
   fi
 
-  grep -Eq "QBTHEME_BASE.*theme\.css|cfx-nui-kora_theme/theme\.css" "$source_html" || fail "$resource source HTML does not link theme.css"
-  grep -Eq "QBTHEME_BASE.*theme\.js|cfx-nui-kora_theme/theme\.js" "$source_html" || fail "$resource source HTML does not load theme.js"
+  grep -Eq "KORA_THEME_BASE.*theme\.css|cfx-nui-kora_theme/theme\.css" "$source_html" || fail "$resource source HTML does not link theme.css"
+  grep -Eq "KORA_THEME_BASE.*theme\.js|cfx-nui-kora_theme/theme\.js" "$source_html" || fail "$resource source HTML does not load theme.js"
   [ -f "$built_html" ] || fail "$resource has no built HTML"
   grep -Eq "https://cfx-nui-kora_theme/theme\.css" "$built_html" || fail "$resource build copied or omitted theme.css"
   grep -Eq "https://cfx-nui-kora_theme/theme\.js" "$built_html" || fail "$resource build copied or omitted theme.js"

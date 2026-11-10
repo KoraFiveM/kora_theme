@@ -1,6 +1,6 @@
 local root = debug.getinfo(1, 'S').source:sub(2):match('(.*/)') .. '../'
 local callbacks, commands, handlers, events, messages, focus = {}, {}, {}, {}, {}, {}
-local kvp = { ['qbtheme:playerTheme'] = '#7c3aed' }
+local kvp = { ['kora_theme:playerTheme'] = '#7c3aed' }
 local registered = {}
 
 _G.exports = setmetatable({}, {
@@ -47,29 +47,29 @@ equal(events[#events].name, 'chat:addSuggestion', 'chat restart publishes sugges
 
 commands.theme(0, {})
 equal(focus[#focus][1], true, 'bare command gives keyboard focus')
-equal(messages[#messages].action, 'qbtheme:open', 'bare command opens picker')
+equal(messages[#messages].action, 'kora_theme:open', 'bare command opens picker')
 equal(messages[#messages].data.selected, '#7C3AED', 'picker receives saved theme')
 
 commands.theme(0, { '22c55e' })
-equal(kvp['qbtheme:playerTheme'], '#22C55E', 'command saves normalised colour')
+equal(kvp['kora_theme:playerTheme'], '#22C55E', 'command saves normalised colour')
 equal(registered.getPlayerTheme(), '#22C55E', 'command updates current theme')
-equal(events[#events].name, 'qbtheme:playerThemeChanged', 'command announces theme change')
+equal(events[#events].name, 'kora_theme:playerThemeChanged', 'command announces theme change')
 
 local result
-callbacks['qbtheme:set']({ colour = '#F97316' }, function(value) result = value end)
+callbacks['kora_theme:set']({ colour = '#F97316' }, function(value) result = value end)
 equal(result.ok, true, 'picker accepts a valid colour')
-equal(kvp['qbtheme:playerTheme'], '#F97316', 'picker persists valid colour')
+equal(kvp['kora_theme:playerTheme'], '#F97316', 'picker persists valid colour')
 
-callbacks['qbtheme:set']({ colour = 'orange' }, function(value) result = value end)
+callbacks['kora_theme:set']({ colour = 'orange' }, function(value) result = value end)
 equal(result.ok, false, 'picker rejects malformed colour')
-equal(kvp['qbtheme:playerTheme'], '#F97316', 'malformed colour does not replace KVP')
+equal(kvp['kora_theme:playerTheme'], '#F97316', 'malformed colour does not replace KVP')
 
 commands.theme(0, { 'reset' })
-equal(kvp['qbtheme:playerTheme'], nil, 'reset deletes saved theme')
+equal(kvp['kora_theme:playerTheme'], nil, 'reset deletes saved theme')
 equal(registered.getPlayerTheme(), nil, 'reset restores default state')
 
 local ready
-callbacks['qbtheme:ready']({}, function(value) ready = value end)
+callbacks['kora_theme:ready']({}, function(value) ready = value end)
 equal(ready.overrides, nil, 'ready response reports server default')
 equal(type(ready.picker.presets), 'table', 'ready response includes presets')
 equal(ready.picker.presets[1].label, 'Kora green', 'picker lists Kora green first')
@@ -78,18 +78,18 @@ equal(ready.picker.presets[2].label, 'Crimson', 'picker lists theme.json presets
 
 equal(ready.fonts.body.stack, KoraThemeFile.fontDefaults.sans, 'ready response includes resolved fonts')
 
-QBThemeConfig.fonts.body = 'poppins'
-handlers['qbtheme:fontsChanged']()
-equal(messages[#messages].action, 'qbtheme:fonts', 'font change updates the picker frame')
+KoraThemeConfig.fonts.body = 'poppins'
+handlers['kora_theme:fontsChanged']()
+equal(messages[#messages].action, 'kora_theme:fonts', 'font change updates the picker frame')
 equal(messages[#messages].data.body.id, 'poppins', 'picker frame receives the configured font')
 equal(messages[#messages].data.body.source, 'config', 'picker frame receives the font source')
-QBThemeConfig.fonts.body = 'theme'
+KoraThemeConfig.fonts.body = 'theme'
 
-callbacks['qbtheme:close']({}, function() end)
+callbacks['kora_theme:close']({}, function() end)
 equal(focus[#focus][1], false, 'close releases keyboard focus')
-equal(messages[#messages].action, 'qbtheme:close', 'close hides picker')
+equal(messages[#messages].action, 'kora_theme:close', 'close hides picker')
 
-QBThemeConfig = {
+KoraThemeConfig = {
     playerTheme = { enabled = false, command = 'disabledtheme', kvpKey = 'disabled' },
 }
 commands, callbacks, registered = {}, {}, {}
@@ -100,4 +100,4 @@ dofile(root .. 'client/main.lua')
 equal(commands.disabledtheme, nil, 'disabled config does not register command')
 equal(registered.getPlayerTheme(), nil, 'disabled config ignores player theme')
 
-print(('qbtheme client: %d assertions passed'):format(assertions))
+print(('kora_theme client: %d assertions passed'):format(assertions))

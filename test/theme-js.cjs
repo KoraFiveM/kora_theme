@@ -23,7 +23,7 @@ global.window = {
 }
 global.GetParentResourceName = () => "consumer"
 global.fetch = async (url) => {
-  if (url === "https://consumer/qbtheme:ready") {
+  if (url === "https://consumer/kora_theme:ready") {
     readyPings += 1
     return { ok: true, json: async () => ({ overrides: "#22C55E", ...(readyFonts ? { fonts: readyFonts } : {}) }) }
   }
@@ -48,46 +48,46 @@ setImmediate(async () => {
   assert.equal(values.get("--radius-lg"), "10px")
   assert.equal(values.get("--shadow-floating"), "0 10px 28px rgb(0 0 0 / 40%)")
 
-  listeners.message({ origin: "https://untrusted.example", data: { action: "qbtheme:override", data: "#7C3AED" } })
+  listeners.message({ origin: "https://untrusted.example", data: { action: "kora_theme:override", data: "#7C3AED" } })
   assert.equal(values.get("--primary"), "142.1 70.6% 45.3%")
 
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: "#7C3AED" } })
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:override", data: "#7C3AED" } })
   assert.equal(values.get("--primary"), "262.1 83.3% 57.8%")
   assert.equal(values.get("--background"), "0 0% 6.3%")
 
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: { primary: "bad", warning: "#FDE047" } } })
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:override", data: { primary: "bad", warning: "#FDE047" } } })
   assert.equal(values.get("--primary"), "84.9 100% 50%")
   assert.equal(values.get("--primary-foreground"), "0 0% 6.3%")
   assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
 
-  await window.QBTheme.refresh()
+  await window.KoraTheme.refresh()
   assert.equal(fetches, 2)
   assert.equal(values.get("--warning"), "50.4 97.8% 63.5%")
 
   // Editing theme.json alone changes the output (no embedded fallback palette).
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: null } })
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:override", data: null } })
   themeJson = { colors: { ...themeJson.colors, primary: "#1E90FF" } }
-  await window.QBTheme.refresh()
+  await window.KoraTheme.refresh()
   assert.equal(values.get("--primary"), "209.6 100% 55.9%")
   themeJson = { colors: { primary: "#1E90FF" } }
   values.clear()
-  await window.QBTheme.refresh()
+  await window.KoraTheme.refresh()
   assert.equal(values.get("--primary"), "209.6 100% 55.9%")
   assert.equal(values.has("--background"), false)
 
   // A bridge-free page (the loading screen) sets the player's colour itself; a bridge override still wins.
-  window.QBThemePagePrimary = "#7C3AED"
-  listeners["qbtheme:page-primary"]()
+  window.KoraThemePagePrimary = "#7C3AED"
+  listeners["kora_theme:page-primary"]()
   assert.equal(values.get("--primary"), "262.1 83.3% 57.8%")
-  await window.QBTheme.refresh()
+  await window.KoraTheme.refresh()
   assert.equal(values.get("--primary"), "262.1 83.3% 57.8%", "a theme.json reload keeps the page colour")
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: "#22C55E" } })
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:override", data: "#22C55E" } })
   assert.equal(values.get("--primary"), "142.1 70.6% 45.3%")
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:override", data: null } })
-  window.QBThemePagePrimary = "not a colour"
-  listeners["qbtheme:page-primary"]()
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:override", data: null } })
+  window.KoraThemePagePrimary = "not a colour"
+  listeners["kora_theme:page-primary"]()
   assert.equal(values.get("--primary"), "209.6 100% 55.9%", "an invalid page colour falls back to theme.json")
-  window.QBThemePagePrimary = null
+  window.KoraThemePagePrimary = null
 
   assert.doesNotMatch(require("node:fs").readFileSync(path.join(__dirname, "..", "theme.js"), "utf8"), /#[0-9a-fA-F]{6}/)
 
@@ -100,24 +100,24 @@ setImmediate(async () => {
   const warnings = []
   console.warn = (message) => warnings.push(message)
   themeJson = { colors: { primary: "#1E90FF" }, fonts: { body: "Poppins", heading: "default", mono: "url(evil)" } }
-  await window.QBTheme.refresh()
+  await window.KoraTheme.refresh()
   assert.equal(catalogFetches, 1)
   assert.equal(values.get("--font-sans"), stackOf("poppins"))
   assert.equal(values.get("--font-heading"), stackOf("poppins"), "default heading follows the body font")
   assert.equal(values.has("--font-mono"), false, "invalid mono value is ignored")
   assert.equal(warnings.length, 1)
   themeJson = { colors: { primary: "#1E90FF" }, fonts: { body: "Arial, \"Helvetica Neue\"", heading: "oswald", mono: "a;}body{" } }
-  await window.QBTheme.refresh()
+  await window.KoraTheme.refresh()
   assert.equal(values.get("--font-sans"), `Arial, "Helvetica Neue", ${catalog.defaults.sans}`)
   assert.equal(values.get("--font-heading"), stackOf("oswald"))
   assert.equal(values.has("--font-mono"), false)
   console.warn = warn
 
-  // qbtheme:fonts from the Lua bridge (/config) wins over theme.json; a
+  // kora_theme:fonts from the Lua bridge (/config) wins over theme.json; a
   // "default" source keeps the theme.json value.
-  listeners.message({ origin: "https://untrusted.example", data: { action: "qbtheme:fonts", data: { body: { stack: "Evil", source: "config" } } } })
+  listeners.message({ origin: "https://untrusted.example", data: { action: "kora_theme:fonts", data: { body: { stack: "Evil", source: "config" } } } })
   assert.equal(values.get("--font-sans"), `Arial, "Helvetica Neue", ${catalog.defaults.sans}`)
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:fonts", data: {
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:fonts", data: {
     body: { id: "roboto", stack: stackOf("roboto"), source: "config" },
     heading: { id: "default", stack: catalog.defaults.sans, source: "default" },
     mono: { id: "jetbrains-mono", stack: stackOf("jetbrains-mono"), source: "config" },
@@ -125,20 +125,20 @@ setImmediate(async () => {
   assert.equal(values.get("--font-sans"), stackOf("roboto"))
   assert.equal(values.get("--font-heading"), stackOf("oswald"), "default server heading keeps theme.json")
   assert.equal(values.get("--font-mono"), stackOf("jetbrains-mono"))
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:fonts", data: { body: { stack: "x; } body { color: red", source: "config" } } } })
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:fonts", data: { body: { stack: "x; } body { color: red", source: "config" } } } })
   assert.equal(values.get("--font-sans"), `Arial, "Helvetica Neue", ${catalog.defaults.sans}`, "unsafe server stack is ignored")
-  listeners.message({ origin: "nui://game", data: { action: "qbtheme:fonts", data: null } })
+  listeners.message({ origin: "nui://game", data: { action: "kora_theme:fonts", data: null } })
   assert.equal(values.has("--font-mono"), false, "clearing server fonts restores theme.json/theme.css")
 
-  // A freshly opened UI receives the /config fonts in the qbtheme:ready response.
+  // A freshly opened UI receives the /config fonts in the kora_theme:ready response.
   themeJson = { colors: { primary: "#1E90FF" } }
   readyFonts = { body: { id: "montserrat", stack: stackOf("montserrat"), source: "config" } }
-  await window.QBTheme.refresh()
+  await window.KoraTheme.refresh()
   assert.equal(values.has("--font-sans"), false)
   delete require.cache[require.resolve(path.join(__dirname, "..", "theme.js"))]
   require(path.join(__dirname, "..", "theme.js"))
   await new Promise((resolve) => setImmediate(resolve))
   assert.equal(values.get("--font-sans"), stackOf("montserrat"))
   assert.equal(values.get("--font-heading"), stackOf("montserrat"))
-  console.log("qbtheme browser loader: 41 assertions passed")
+  console.log("kora_theme browser loader: 41 assertions passed")
 })

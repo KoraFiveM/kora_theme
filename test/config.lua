@@ -1,4 +1,4 @@
--- config.lua registers QBThemeConfig with kora_lib's /config bridge. Runs the
+-- config.lua registers KoraThemeConfig with kora_lib's /config bridge. Runs the
 -- registration against a recording bridge, and against the real kora_lib
 -- consumer bridge when a kora_lib checkout sits next to this resource.
 local root = debug.getinfo(1, 'S').source:sub(2):match('(.*/)') .. '../'
@@ -77,14 +77,14 @@ local monoValues = {}
 for _, option in ipairs(fonts.mono.options.options) do monoValues[option.value] = true end
 equal(monoValues.poppins, nil, 'monospace dropdown lists only monospace fonts')
 equal(monoValues['roboto-mono'], true, 'monospace dropdown lists Roboto Mono')
-equal(QBThemeConfig.fonts.body, 'theme', 'adopted plain table keeps the font values')
-equal(QBThemeConfig.playerTheme.command, 'theme', 'adopted table keeps playerTheme')
+equal(KoraThemeConfig.fonts.body, 'theme', 'adopted plain table keeps the font values')
+equal(KoraThemeConfig.playerTheme.command, 'theme', 'adopted table keeps playerTheme')
 
 recorded.onChange['fonts.body']('poppins', 'theme')
-equal(events[#events].name, 'qbtheme:fontsChanged', 'font change raises the local fonts event')
+equal(events[#events].name, 'kora_theme:fontsChanged', 'font change raises the local fonts event')
 
 -- Real kora_lib bridge (client realm): the schema validates and a live
--- /config update rewrites QBThemeConfig.fonts and raises the fonts event.
+-- /config update rewrites KoraThemeConfig.fonts and raises the fonts event.
 local realBridge = read(root .. '../kora_lib/modules/config/consumer.lua')
 if realBridge then
     local netHandlers = {}
@@ -93,19 +93,19 @@ if realBridge then
     _G.RegisterNetEvent = function(name, handler) netHandlers[name] = handler end
     _G.AddEventHandler = function() end
     bridgeSource = realBridge
-    QBThemeConfig = nil
+    KoraThemeConfig = nil
     dofile(root .. 'config.lua')
-    equal(QBThemeConfig.fonts.heading, 'theme', 'real bridge adopts the heading default')
-    equal(QBThemeConfig.fonts.custom.mono, '', 'real bridge adopts the custom defaults')
+    equal(KoraThemeConfig.fonts.heading, 'theme', 'real bridge adopts the heading default')
+    equal(KoraThemeConfig.fonts.custom.mono, '', 'real bridge adopts the custom defaults')
     dofile(root .. 'shared.lua')
     events = {}
     netHandlers['kora_lib:client:configUpdated']('kora_theme', { 'fonts', 'body' }, 'oswald', 2)
-    equal(QBThemeConfig.fonts.body, 'oswald', 'live update writes QBThemeConfig.fonts.body')
-    equal(events[#events] and events[#events].name, 'qbtheme:fontsChanged', 'live update raises the fonts event')
+    equal(KoraThemeConfig.fonts.body, 'oswald', 'live update writes KoraThemeConfig.fonts.body')
+    equal(events[#events] and events[#events].name, 'kora_theme:fontsChanged', 'live update raises the fonts event')
     equal(registered.getFonts().body.id, 'oswald', 'getFonts follows the live update')
     netHandlers['kora_lib:client:configUpdated']('kora_theme', { 'fonts', 'custom', 'body' }, 'Arial', 3)
     equal(registered.getFonts().body.stack:sub(1, 7), 'Arial, ', 'custom family overrides the dropdown live')
-    print(('qbtheme config: %d assertions passed (with kora_lib bridge)'):format(assertions))
+    print(('kora_theme config: %d assertions passed (with kora_lib bridge)'):format(assertions))
 else
-    print(('qbtheme config: %d assertions passed (kora_lib not found; real bridge skipped)'):format(assertions))
+    print(('kora_theme config: %d assertions passed (kora_lib not found; real bridge skipped)'):format(assertions))
 end

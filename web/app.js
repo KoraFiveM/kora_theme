@@ -62,7 +62,7 @@
   const choose = async (colour) => {
     error.textContent = "";
     try {
-      const result = await post("qbtheme:set", { colour });
+      const result = await post("kora_theme:set", { colour });
       if (!result.ok) throw new Error(result.message || "Could not save that colour.");
       render(result.state);
     } catch (reason) {
@@ -73,20 +73,20 @@
   const close = async () => {
     picker.classList.remove("open");
     picker.setAttribute("aria-hidden", "true");
-    try { await post("qbtheme:close"); } catch (_) { /* resource may be stopping */ }
+    try { await post("kora_theme:close"); } catch (_) { /* resource may be stopping */ }
   };
 
   window.addEventListener("message", (event) => {
     if (event.origin !== "nui://game") return;
-    if (event.data?.action === "qbtheme:open") {
+    if (event.data?.action === "kora_theme:open") {
       render(event.data.data);
       picker.classList.add("open");
       picker.setAttribute("aria-hidden", "false");
       document.getElementById("close").focus();
-    } else if (event.data?.action === "qbtheme:close") {
+    } else if (event.data?.action === "kora_theme:close") {
       picker.classList.remove("open");
       picker.setAttribute("aria-hidden", "true");
-    } else if (event.data?.action === "qbtheme:state") {
+    } else if (event.data?.action === "kora_theme:state") {
       render(event.data.data);
     }
   });

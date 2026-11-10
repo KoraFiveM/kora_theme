@@ -26,16 +26,16 @@ local function equal(actual, expected, message)
     if actual ~= expected then error(('%s: expected %s, got %s'):format(message, tostring(expected), tostring(actual)), 2) end
 end
 
-QBTheme.apply('#7C3AED')
+KoraTheme.apply('#7C3AED')
 equal(lastOverrides, '#7C3AED', 'apply forwards override')
-equal(sent[#sent].action, 'qbtheme:override', 'apply message action')
+equal(sent[#sent].action, 'kora_theme:override', 'apply message action')
 equal(sent[#sent].data, '#7C3AED', 'apply message carries the raw override')
 
-QBTheme.refresh()
+KoraTheme.refresh()
 equal(lastOverrides, '#7C3AED', 'refresh retains cached override')
 
 local response
-callbacks['qbtheme:ready']({}, function(value) response = value end)
+callbacks['kora_theme:ready']({}, function(value) response = value end)
 equal(response.overrides, '#7C3AED', 'ready returns the effective resource override')
 equal(response.fonts, fonts, 'ready returns the resolved server fonts')
 
@@ -43,26 +43,26 @@ local before = #sent
 handlers.onClientResourceStart('unrelated')
 equal(#sent, before, 'unrelated restart ignored')
 handlers.onClientResourceStart('kora_theme')
-equal(#sent, before + 3, 'qbtheme restart reloads and reapplies tokens and fonts')
+equal(#sent, before + 3, 'kora_theme restart reloads and reapplies tokens and fonts')
 equal(lastOverrides, '#7C3AED', 'restart retains cached override')
-equal(sent[#sent - 2].action, 'qbtheme:refresh', 'restart reloads theme.json')
-equal(sent[#sent - 1].action, 'qbtheme:override', 'restart reapplies effective override')
-equal(sent[#sent].action, 'qbtheme:fonts', 'restart resends the server fonts')
+equal(sent[#sent - 2].action, 'kora_theme:refresh', 'restart reloads theme.json')
+equal(sent[#sent - 1].action, 'kora_theme:override', 'restart reapplies effective override')
+equal(sent[#sent].action, 'kora_theme:fonts', 'restart resends the server fonts')
 
-QBTheme.apply({ warning = '#F59E0B' })
+KoraTheme.apply({ warning = '#F59E0B' })
 equal(type(lastOverrides), 'table', 'semantic table override cached')
 equal(lastOverrides.warning, '#F59E0B', 'semantic table forwarded')
 equal(lastOverrides.primary, '#22C55E', 'player preference supplies primary for semantic override')
 
 playerTheme = '#3B82F6'
-handlers['qbtheme:playerThemeChanged']()
+handlers['kora_theme:playerThemeChanged']()
 equal(lastOverrides.primary, '#3B82F6', 'player theme event refreshes consumer primary')
-equal(sent[#sent].action, 'qbtheme:override', 'player theme event updates browser')
+equal(sent[#sent].action, 'kora_theme:override', 'player theme event updates browser')
 
 fonts = { body = { id = 'poppins', stack = '"Kora Poppins", sans-serif', source = 'config' } }
-handlers['qbtheme:fontsChanged']()
-equal(sent[#sent].action, 'qbtheme:fonts', 'font change message action')
+handlers['kora_theme:fontsChanged']()
+equal(sent[#sent].action, 'kora_theme:fonts', 'font change message action')
 equal(sent[#sent].data.body.id, 'poppins', 'font change forwards the resolved fonts')
-equal(QBTheme.fonts(), fonts, 'QBTheme.fonts reads the provider export')
+equal(KoraTheme.fonts(), fonts, 'KoraTheme.fonts reads the provider export')
 
-print('qbtheme bridge: 20 assertions passed')
+print('kora_theme bridge: 20 assertions passed')

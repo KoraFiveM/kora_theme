@@ -1,6 +1,6 @@
 -- Colours are NOT configured here: edit theme.json, the single source of truth
 -- (loaded by theme_loader.lua). This file only holds behaviour options.
-QBThemeConfig = {
+KoraThemeConfig = {
     -- Players can choose a personal primary colour with /theme. The choice is
     -- saved in client KVP storage and never leaves their machine. Set enabled
     -- to false to keep the server-wide colour from theme.json for everyone.
@@ -8,7 +8,7 @@ QBThemeConfig = {
     playerTheme = {
         enabled = true,
         command = 'theme',
-        kvpKey = 'qbtheme:playerTheme',
+        kvpKey = 'kora_theme:playerTheme',
     },
     -- Server-wide font overrides, editable live in kora_lib's /config. 'theme'
     -- follows theme.json's "fonts"; 'default' is the built-in stack; any other
@@ -31,11 +31,11 @@ local FONT_FIELDS = {
         description = 'Font for codes, numbers and other fixed-width text in every Kora UI.' },
 }
 
--- Builds the /config descriptors for QBThemeConfig.fonts. The dropdown lists
+-- Builds the /config descriptors for KoraThemeConfig.fonts. The dropdown lists
 -- the bundled fonts from fonts/catalog.json; the monospace slot lists only
 -- monospace fonts. Changes apply live to every open UI.
 local function fontDescriptors(bridge)
-    local fonts = type(QBThemeConfig.fonts) == 'table' and QBThemeConfig.fonts or {}
+    local fonts = type(KoraThemeConfig.fonts) == 'table' and KoraThemeConfig.fonts or {}
     local custom = type(fonts.custom) == 'table' and fonts.custom or {}
     local catalog = type(KoraThemeFile) == 'table' and KoraThemeFile.catalog or {}
     local descriptors = { custom = {} }
@@ -67,7 +67,7 @@ end
 local function announceFonts()
     -- Each consumer's bridge.lua listens for this local event and forwards the
     -- resolved fonts to its own NUI frame.
-    if type(TriggerEvent) == 'function' then TriggerEvent('qbtheme:fontsChanged') end
+    if type(TriggerEvent) == 'function' then TriggerEvent('kora_theme:fontsChanged') end
 end
 
 -- kora_lib depends on kora_theme, so this resource cannot declare kora_lib as a normal
@@ -80,7 +80,7 @@ local function registerConfiguration()
 
     local factory, loadError = load(source, '@@kora_lib/modules/config/consumer.lua', 't', _ENV)
     if not factory then
-        print(('[qbtheme] Could not load the kora_lib configuration bridge: %s'):format(loadError))
+        print(('[kora_theme] Could not load the kora_lib configuration bridge: %s'):format(loadError))
         return false
     end
 
@@ -94,9 +94,9 @@ local function registerConfiguration()
         bridge.onChange('fonts.custom.' .. field.slot, announceFonts)
     end
     local values = {}
-    for key, value in pairs(QBThemeConfig) do values[key] = value end
+    for key, value in pairs(KoraThemeConfig) do values[key] = value end
     values.fonts = fontDescriptors(bridge)
-    QBThemeConfig = bridge.adopt(values)
+    KoraThemeConfig = bridge.adopt(values)
     return true
 end
 

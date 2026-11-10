@@ -36,7 +36,7 @@ equal(tokens['primary-foreground'], '0 0% 6.3%', 'dark text on kora green')
 equal(tokens['brand-hover'], '84.9 100% 44.9%', 'brand hover derives from green')
 equal(KoraThemeFile.name, 'Kora green', 'primary name comes from theme.json')
 equal(KoraThemeFile.presets[1].label, 'Crimson', 'presets come from theme.json')
-equal(QBThemeConfig.colors, nil, 'config.lua holds no colours')
+equal(KoraThemeConfig.colors, nil, 'config.lua holds no colours')
 local crimson = registered.getTokens('#DC143C')
 equal(crimson['primary-foreground'], '0 0% 100%', 'crimson preset keeps white text')
 
@@ -108,7 +108,7 @@ for _, path in ipairs({ 'config.lua', 'shared.lua', 'client/main.lua', 'client/b
     assert(not source:find('#%x%x%x%x%x%x'), path .. ' must not embed colour hex values')
 end
 
--- Fonts: theme.json "fonts" + fonts/catalog.json, overridden by QBThemeConfig.fonts.
+-- Fonts: theme.json "fonts" + fonts/catalog.json, overridden by KoraThemeConfig.fonts.
 local fontAssertions = 0
 local function check(actual, expected, message) fontAssertions = fontAssertions + 1 equal(actual, expected, message) end
 local catalog = json.decode(catalogJson)
@@ -194,25 +194,25 @@ _G.print = realPrint
 
 -- /config overrides win over theme.json; custom family lists win over the dropdown.
 withFonts('{ "heading": "oswald", "body": "poppins" }')
-QBThemeConfig.fonts = { heading = 'theme', body = 'roboto', mono = 'roboto-mono', custom = { heading = '', body = '', mono = '' } }
+KoraThemeConfig.fonts = { heading = 'theme', body = 'roboto', mono = 'roboto-mono', custom = { heading = '', body = '', mono = '' } }
 local configured = registered.getFonts()
 check(configured.body.id, 'roboto', 'config dropdown overrides theme.json')
 check(configured.body.source, 'config', 'config source')
 check(configured.heading.id, 'oswald', "'theme' follows theme.json")
 check(configured.mono.id, 'roboto-mono', 'config mono')
-QBThemeConfig.fonts.custom.body = 'Comic Sans MS'
-QBThemeConfig.fonts.heading = 'default'
+KoraThemeConfig.fonts.custom.body = 'Comic Sans MS'
+KoraThemeConfig.fonts.heading = 'default'
 configured = registered.getFonts()
 check(configured.body.stack, 'Comic Sans MS, ' .. catalog.defaults.sans, 'custom family overrides the dropdown')
 check(configured.heading.stack, configured.body.stack, "config 'default' heading follows the body font")
 check(configured.heading.source, 'config', 'explicit default heading is a config choice')
 _G.print = function() end
-QBThemeConfig.fonts.custom.body = 'x;}'
-QBThemeConfig.fonts.mono = 'not-a-font!'
+KoraThemeConfig.fonts.custom.body = 'x;}'
+KoraThemeConfig.fonts.mono = 'not-a-font!'
 configured = registered.getFonts()
 _G.print = realPrint
 check(configured.body.id, 'roboto', 'invalid custom family falls back to the dropdown')
 check(configured.mono.stack, catalog.defaults.mono, 'invalid dropdown value falls back to theme.json/default')
 check(registered.getTokens()['font-sans'], configured.body.stack, 'getTokens uses config fonts')
 
-print(('qbtheme: %d assertions passed'):format(40 + fontAssertions))
+print(('kora_theme: %d assertions passed'):format(40 + fontAssertions))

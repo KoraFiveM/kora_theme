@@ -1,7 +1,7 @@
-local PLAYER_THEME = type(QBThemeConfig) == 'table' and QBThemeConfig.playerTheme or {}
+local PLAYER_THEME = type(KoraThemeConfig) == 'table' and KoraThemeConfig.playerTheme or {}
 local ENABLED = PLAYER_THEME.enabled ~= false
 local COMMAND = type(PLAYER_THEME.command) == 'string' and PLAYER_THEME.command ~= '' and PLAYER_THEME.command or 'theme'
-local KVP_KEY = type(PLAYER_THEME.kvpKey) == 'string' and PLAYER_THEME.kvpKey ~= '' and PLAYER_THEME.kvpKey or 'qbtheme:playerTheme'
+local KVP_KEY = type(PLAYER_THEME.kvpKey) == 'string' and PLAYER_THEME.kvpKey ~= '' and PLAYER_THEME.kvpKey or 'kora_theme:playerTheme'
 local pickerOpen = false
 local selectedColour
 
@@ -58,9 +58,9 @@ local function announceChange()
     -- Every UI-owning resource imports bridge.lua into its own client VM. A
     -- local event reaches each copy without sending this personal preference
     -- to the server or another player.
-    TriggerEvent('qbtheme:playerThemeChanged')
-    SendNUIMessage({ action = 'qbtheme:override', data = selectedColour })
-    SendNUIMessage({ action = 'qbtheme:state', data = pickerState() })
+    TriggerEvent('kora_theme:playerThemeChanged')
+    SendNUIMessage({ action = 'kora_theme:override', data = selectedColour })
+    SendNUIMessage({ action = 'kora_theme:state', data = pickerState() })
 end
 
 local function setPlayerTheme(value)
@@ -86,14 +86,14 @@ local function closePicker()
     if not pickerOpen then return end
     pickerOpen = false
     SetNuiFocus(false, false)
-    SendNUIMessage({ action = 'qbtheme:close' })
+    SendNUIMessage({ action = 'kora_theme:close' })
 end
 
 local function openPicker()
     if pickerOpen then return end
     pickerOpen = true
     SetNuiFocus(true, true)
-    SendNUIMessage({ action = 'qbtheme:open', data = pickerState() })
+    SendNUIMessage({ action = 'kora_theme:open', data = pickerState() })
 end
 
 if ENABLED then selectedColour = normaliseHex(GetResourceKvpString(KVP_KEY)) end
@@ -101,23 +101,23 @@ if ENABLED then selectedColour = normaliseHex(GetResourceKvpString(KVP_KEY)) end
 exports('getPlayerTheme', getPlayerTheme)
 exports('setPlayerTheme', setPlayerTheme)
 
-RegisterNUICallback('qbtheme:ready', function(_, cb)
+RegisterNUICallback('kora_theme:ready', function(_, cb)
     cb({ overrides = selectedColour, picker = pickerState(), fonts = resolvedFonts() })
 end)
 
 -- config.lua raises this when an admin changes a font in /config; consumers'
 -- bridge.lua copies handle their own frames, this updates the picker frame.
-AddEventHandler('qbtheme:fontsChanged', function()
-    SendNUIMessage({ action = 'qbtheme:fonts', data = resolvedFonts() })
+AddEventHandler('kora_theme:fontsChanged', function()
+    SendNUIMessage({ action = 'kora_theme:fonts', data = resolvedFonts() })
 end)
 
-RegisterNUICallback('qbtheme:set', function(payload, cb)
+RegisterNUICallback('kora_theme:set', function(payload, cb)
     local value = type(payload) == 'table' and payload.colour or nil
     local ok, message = setPlayerTheme(value)
     cb({ ok = ok, message = message, state = pickerState() })
 end)
 
-RegisterNUICallback('qbtheme:close', function(_, cb)
+RegisterNUICallback('kora_theme:close', function(_, cb)
     cb({})
     closePicker()
 end)
