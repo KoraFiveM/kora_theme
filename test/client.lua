@@ -55,6 +55,18 @@ equal(kvp['kora_theme:playerTheme'], '#22C55E', 'command saves normalised colour
 equal(registered.getPlayerTheme(), '#22C55E', 'command updates current theme')
 equal(events[#events].name, 'kora_theme:playerThemeChanged', 'command announces theme change')
 
+callbacks['kora_theme:close']({}, function() end)
+local openCount = #messages
+commands.theme(0, {}, 'theme')
+equal(messages[#messages].action, 'kora_theme:open', 'bare raw command still opens picker')
+callbacks['kora_theme:close']({}, function() end)
+-- The console drops a '#'-prefixed word from args; the raw line still has it.
+commands.theme(0, {}, 'theme #3b82f6')
+equal(registered.getPlayerTheme(), '#3B82F6', 'hash colour is read from the raw command')
+equal(#messages > openCount, true, 'raw colour command announces the change')
+commands.theme(0, { '22c55e' })
+commands.theme(0, {}) -- leave the picker open as before for the checks below
+
 local result
 callbacks['kora_theme:set']({ colour = '#F97316' }, function(value) result = value end)
 equal(result.ok, true, 'picker accepts a valid colour')

@@ -129,8 +129,13 @@ if ENABLED then
         })
     end
 
-    RegisterCommand(COMMAND, function(_, args)
+    RegisterCommand(COMMAND, function(_, args, rawCommand)
         local value = type(args) == 'table' and args[1] or nil
+        -- The console tokenizer treats a word starting with '#' as a comment,
+        -- so `/theme #RRGGBB` arrives without arguments; read the raw line.
+        if not value and type(rawCommand) == 'string' then
+            value = rawCommand:match('^%s*%S+%s+(%S+)')
+        end
         if not value then
             openPicker()
             return
