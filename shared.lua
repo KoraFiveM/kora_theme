@@ -22,9 +22,12 @@ local function round1(value)
     return math.floor(value * 10 + 0.5) / 10
 end
 
+-- Fixed precision, then trimmed: tostring() can expose float noise such as
+-- 0.54999999999996 for 0.55, which theme.js would print as 0.55.
 local function numberString(value)
     if value == math.floor(value) then return tostring(math.floor(value)) end
-    return tostring(value)
+    local text = ('%.4f'):format(value):gsub('0+$', ''):gsub('%.$', '')
+    return text
 end
 
 local function rgbFromHex(hex)
