@@ -16,17 +16,18 @@ Current version: see `version` in `fxmanifest.lua`.
 - **Bundled fonts** - nine OFL-licensed fonts selectable by id, with optional custom font-family lists. See [Fonts](./fonts.md).
 - **Player themes** - `/theme` lets each player choose a personal primary colour, stored client-side. See [Commands](./commands.md) and [Player theme picker](./ui.md).
 - **Live font control** - admins can change fonts in kora_lib's `/config` and every open UI updates. See [Configuration](./configuration.md).
-- **Lua exports** - resolved tokens, palette, fonts and the player colour. See [Exports](./exports.md).
+- **Lua exports** - resolved tokens, palette, fonts and the player colour. See [API reference](./api/index.md).
 - **Vite plugin** - serves the theme files in a Vite dev server and rewrites production URLs. See [Vite plugin](./vite-plugin.md).
 
 ## Pages
 
-- [Installation](./installation.md) - start order, dependencies and consumer setup
+- [Installation](./installation.md) - install steps, manifest reference, consumer setup, dependencies
+- [How to use](./how-to-use.md) - player walkthrough, palette resolution, shape, fonts, Lua examples
 - [theme.json](./theme-json.md) - palette, shape, presets and name
 - [Fonts](./fonts.md) - bundled fonts, custom families, adding a font
 - [Configuration](./configuration.md) - `config.lua` options and the `/config` font settings
 - [Commands](./commands.md) - the `/theme` command
-- [Exports](./exports.md) - Lua exports and the `KoraTheme` bridge API
+- [API reference](./api/index.md) - Lua exports and the `KoraTheme` bridge API
 - [Events](./events.md) - local events and NUI messages and callbacks
 - [Using the theme in a UI](./integration.md) - loading the CSS/JS and the bridge in a consumer resource
 - [Design tokens](./tokens.md) - CSS variables and component rules

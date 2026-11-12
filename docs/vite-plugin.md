@@ -1,6 +1,6 @@
 ---
 title: Vite plugin
-sidebar_position: 12
+sidebar_position: 13
 ---
 
 # Vite plugin

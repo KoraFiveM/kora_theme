@@ -150,4 +150,4 @@ complete map also contains the resolved `font-sans`, `font-heading` and
 `font-mono` stacks and the fixed spacing, radius, shadow,
 focus, selection, and motion tokens defined by `theme.css`.
 
-Full documentation (configuration, commands, exports, events, tokens) lives in [`docs/`](docs/index.md).
+Full documentation (installation, how to use, commands, API reference, configuration, events, tokens) lives in [`docs/`](docs/index.md).
