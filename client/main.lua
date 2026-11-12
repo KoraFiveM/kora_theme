@@ -1,0 +1,166 @@
+local PLAYER_THEME = type(KoraThemeConfig) == 'table' and KoraThemeConfig.playerTheme or {}
+local ENABLED = PLAYER_THEME.enabled ~= false
+local COMMAND = type(PLAYER_THEME.command) == 'string' and PLAYER_THEME.command ~= '' and PLAYER_THEME.command or 'theme'
+local KVP_KEY = type(PLAYER_THEME.kvpKey) == 'string' and PLAYER_THEME.kvpKey ~= '' and PLAYER_THEME.kvpKey or 'kora_theme:playerTheme'
+local pickerOpen = false
+local selectedColour
+
+local function normaliseHex(value)
+    if type(value) ~= 'string' then return nil end
+    value = value:match('^%s*(.-)%s*$')
+    if value:sub(1, 1) ~= '#' and value:match('^%x%x%x%x%x%x$') then value = '#' .. value end
+    if not value:match('^#%x%x%x%x%x%x$') then return nil end
+    return value:upper()
+end
+
+local function serverPrimary()
+    return type(KoraThemeFile) == 'table' and normaliseHex(KoraThemeFile.colours.primary) or nil
+end
+
+-- The first preset is always the server primary from theme.json, so "default"
+-- tracks the file. Further presets come from theme.json's "presets" list.
+local function configuredPresets()
+    local presets, seen = {}, {}
+    local function add(label, colour)
+        colour = normaliseHex(colour)
+        if colour and type(label) == 'string' and label ~= '' and #label <= 40 and not seen[colour] then
+            seen[colour] = true
+            presets[#presets + 1] = { label = label, colour = colour }
+        end
+    end
+
+    if type(KoraThemeFile) ~= 'table' then return presets end
+    add(KoraThemeFile.name or 'Server default', serverPrimary())
+    for _, preset in ipairs(KoraThemeFile.presets or {}) do add(preset.label, preset.colour) end
+    return presets
+end
+
+local function getPlayerTheme()
+    if not ENABLED then return nil end
+    return selectedColour
+end
+
+local function resolvedFonts()
+    local ok, fonts = pcall(function() return exports[GetCurrentResourceName()]:getFonts() end)
+    return ok and type(fonts) == 'table' and fonts or nil
+end
+
+local function pickerState()
+    return {
+        enabled = ENABLED,
+        selected = selectedColour,
+        default = serverPrimary(),
+        presets = configuredPresets(),
+    }
+end
+
+local function announceChange()
+    -- Every UI-owning resource imports bridge.lua into its own client VM. A
+    -- local event reaches each copy without sending this personal preference
+    -- to the server or another player.
+    TriggerEvent('kora_theme:playerThemeChanged')
+    SendNUIMessage({ action = 'kora_theme:override', data = selectedColour })
+    SendNUIMessage({ action = 'kora_theme:state', data = pickerState() })
+end
+
+local function setPlayerTheme(value)
+    if not ENABLED then return false, 'Player themes are disabled on this server.' end
+
+    if value == nil or value == '' or value == 'reset' or value == 'default' then
+        DeleteResourceKvp(KVP_KEY)
+        selectedColour = nil
+        announceChange()
+        return true
+    end
+
+    local colour = normaliseHex(value)
+    if not colour then return false, 'Use a six-digit hex colour such as #7C3AED, or reset.' end
+
+    SetResourceKvp(KVP_KEY, colour)
+    selectedColour = colour
+    announceChange()
+    return true
+end
+
+local function closePicker()
+    if not pickerOpen then return end
+    pickerOpen = false
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = 'kora_theme:close' })
+end
+
+local function openPicker()
+    if pickerOpen then return end
+    pickerOpen = true
+    SetNuiFocus(true, true)
+    SendNUIMessage({ action = 'kora_theme:open', data = pickerState() })
+end
+
+if ENABLED then selectedColour = normaliseHex(GetResourceKvpString(KVP_KEY)) end
+
+exports('getPlayerTheme', getPlayerTheme)
+exports('setPlayerTheme', setPlayerTheme)
+
+RegisterNUICallback('kora_theme:ready', function(_, cb)
+    cb({ overrides = selectedColour, picker = pickerState(), fonts = resolvedFonts() })
+end)
+
+-- config.lua raises this when an admin changes a font in /config; consumers'
+-- bridge.lua copies handle their own frames, this updates the picker frame.
+AddEventHandler('kora_theme:fontsChanged', function()
+    SendNUIMessage({ action = 'kora_theme:fonts', data = resolvedFonts() })
+end)
+
+RegisterNUICallback('kora_theme:set', function(payload, cb)
+    local value = type(payload) == 'table' and payload.colour or nil
+    local ok, message = setPlayerTheme(value)
+    cb({ ok = ok, message = message, state = pickerState() })
+end)
+
+RegisterNUICallback('kora_theme:close', function(_, cb)
+    cb({})
+    closePicker()
+end)
+
+if ENABLED then
+    local function addChatSuggestion()
+        TriggerEvent('chat:addSuggestion', '/' .. COMMAND, 'Choose your personal server colour scheme.', {
+            { name = 'colour', help = 'Optional #RRGGBB, or reset' },
+        })
+    end
+
+    RegisterCommand(COMMAND, function(_, args, rawCommand)
+        local value = type(args) == 'table' and args[1] or nil
+        -- The console tokenizer treats a word starting with '#' as a comment,
+        -- so `/theme #RRGGBB` arrives without arguments; read the raw line.
+        if not value and type(rawCommand) == 'string' then
+            value = rawCommand:match('^%s*%S+%s+(%S+)')
+        end
+        if not value then
+            openPicker()
+            return
+        end
+
+        local lowered = value:lower()
+        if lowered == 'reset' or lowered == 'default' then value = 'reset' end
+        local ok, message = setPlayerTheme(value)
+        if not ok then
+            TriggerEvent('chat:addMessage', { args = { 'Theme', message } })
+        end
+    end, false)
+
+    addChatSuggestion()
+
+    -- kora_theme normally starts before the chat resource, so repeat the
+    -- suggestion when kora_chat becomes available instead of relying on startup
+    -- order. kora_chat replaces the existing entry when it is already present.
+    AddEventHandler('onClientResourceStart', function(resource)
+        if resource == 'kora_chat' then addChatSuggestion() end
+    end)
+end
+
+AddEventHandler('onClientResourceStop', function(resource)
+    if resource ~= GetCurrentResourceName() then return end
+    closePicker()
+    if ENABLED then TriggerEvent('chat:removeSuggestion', '/' .. COMMAND) end
+end)

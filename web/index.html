@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../theme.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="../theme.js" defer></script>
+    <script src="app.js" defer></script>
+    <title>Theme</title>
+  </head>
+  <body>
+    <main id="picker" class="picker" aria-hidden="true">
+      <section class="panel" role="dialog" aria-modal="true" aria-labelledby="title">
+        <header>
+          <div>
+            <p class="eyebrow">Appearance</p>
+            <h1 id="title">Choose your colour</h1>
+          </div>
+          <button class="icon-button" id="close" type="button" aria-label="Close">×</button>
+        </header>
+
+        <p class="description">This colour is used across the server interface and saved on this device.</p>
+        <div id="presets" class="presets" aria-label="Colour presets"></div>
+
+        <div class="custom">
+          <label for="custom-colour">Custom colour</label>
+          <div class="custom-row">
+            <input id="custom-colour" type="color" value="#7c3aed" />
+            <output id="custom-value" for="custom-colour">#7C3AED</output>
+            <button id="apply" type="button">Apply</button>
+          </div>
+        </div>
+
+        <footer>
+          <button id="reset" class="secondary" type="button">Use server default</button>
+          <button id="done" type="button">Done</button>
+        </footer>
+        <p id="error" class="error" role="status"></p>
+      </section>
+    </main>
+  </body>
+</html>
