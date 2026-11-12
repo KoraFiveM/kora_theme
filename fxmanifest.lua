@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'kora_theme'
 author 'qbcore2'
-version '0.1.0'
+version '0.2.0'
 description 'Shared design tokens and browser styling for qbcore2 resources'
 
 ui_page 'web/index.html'
