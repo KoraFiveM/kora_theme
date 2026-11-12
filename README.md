@@ -149,3 +149,5 @@ from `theme.json`'s `colors`. Invalid values are ignored and logged once. Its
 complete map also contains the resolved `font-sans`, `font-heading` and
 `font-mono` stacks and the fixed spacing, radius, shadow,
 focus, selection, and motion tokens defined by `theme.css`.
+
+Full documentation (configuration, commands, exports, events, tokens) lives in [`docs/`](docs/index.md).
