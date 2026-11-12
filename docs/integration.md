@@ -1,6 +1,6 @@
 ---
 title: Using the theme in a UI
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 # Using the theme in a UI
@@ -27,7 +27,7 @@ dependency 'kora_theme'
 client_script '@kora_theme/client/bridge.lua'
 ```
 
-The bridge answers `kora_theme:ready`, forwards the player colour and font changes, and offers `KoraTheme.apply`. See [Exports](./exports.md) and [Events](./events.md).
+The bridge answers `kora_theme:ready`, forwards the player colour and font changes, and offers `KoraTheme.apply`. See [API reference](./api/index.md) and [Events](./events.md).
 
 Do not import the bridge in a resource whose frame is permanently shut down (a loading screen) or in headless apps that do not own a frame. The bundled `test/consumers.sh` enforces this for the Kora workspace: `kora_loading`, `kora_banking`, `kora_dispatch`, `kora_garages` and `kora_multijob` must not import it, and page consumers must declare the dependency. Bridge-free pages follow `theme.json` only (plus `window.KoraThemePagePrimary`).
 

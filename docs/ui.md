@@ -1,6 +1,6 @@
 ---
 title: Player theme picker
-sidebar_position: 11
+sidebar_position: 12
 ---
 
 # Player theme picker
