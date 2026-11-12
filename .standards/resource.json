@@ -1,0 +1,47 @@
+{
+  "resource": "kora_theme",
+  "standardsRevision": "2026-11-12.1",
+  "realms": {
+    "client": [
+      "client/bridge.lua",
+      "client/main.lua"
+    ],
+    "server": [],
+    "shared": [
+      "config.lua",
+      "shared.lua",
+      "theme_loader.lua"
+    ],
+    "manifest": [
+      "fxmanifest.lua"
+    ],
+    "test": [
+      "test/bridge.lua",
+      "test/client.lua",
+      "test/config.lua",
+      "test/json.lua",
+      "test/theme.lua"
+    ]
+  },
+  "exclude": [
+    ".git/*",
+    ".github/*",
+    ".standards/*",
+    "node_modules/*",
+    "**/node_modules/*",
+    "vendor/*",
+    "**/vendor/*",
+    "web/*",
+    "ui/*",
+    "html/*",
+    "dist/*",
+    "artifacts/*",
+    "runtime/*",
+    "txData/*",
+    "storage/*",
+    "stream/*",
+    "docs/*",
+    "__pycache__/*",
+    "modules/lookup/data/*"
+  ]
+}
