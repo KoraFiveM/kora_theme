@@ -1,0 +1,5 @@
+theme_loader.lua:kora_theme does not load @kora_lib/init.lua (kora_lib depends on kora_theme; a dependency would be a startup cycle), so Kora.logging is unavailable
+config.lua:kora_theme does not load @kora_lib/init.lua (kora_lib depends on kora_theme; cycle); this print reports failure to load the kora_lib bridge itself
+shared.lua:kora_theme does not load @kora_lib/init.lua (startup cycle with kora_lib); Kora.logging unavailable
+client/bridge.lua:kora_theme does not load @kora_lib/init.lua; the file is also loaded into consumer resources via @kora_theme/client/bridge.lua, so it cannot rely on Kora
+theme.js:browser-side theme loader in a plain NUI page with no KoraLogger adapter loaded; no kora_lib dependency
